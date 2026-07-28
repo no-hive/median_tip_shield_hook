@@ -59,7 +59,7 @@ contract Counter is BaseHook {
         return this.afterInitialize.selector;
     }
 
-    function _getFee(PoolKey calldata key) internal virtual returns (uint24)
+    function _getFee () internal virtual returns (uint24)
     {
     uint24 fee = 1;
     return fee;
@@ -70,7 +70,7 @@ contract Counter is BaseHook {
         override
         returns (bytes4, BeforeSwapDelta, uint24)
     {
-        uint24 fee = 1;
-        return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee | LPFeeLibrary.OVERRIDE_FEE_FLAG);
+        uint24 fee_ = _getFee();
+        return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee_ | LPFeeLibrary.OVERRIDE_FEE_FLAG);
     }
 }
