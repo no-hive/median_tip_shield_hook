@@ -46,11 +46,7 @@ contract Counter is BaseHook {
     // -----------------------------------------------
     error NotDynamicFee();
 
-    function _getInitFee(PoolKey calldata key) internal virtual returns (uint24)
-    {
-    uint24 fee = 1;
-    return fee;
-    }
+    uint24 immutable INIT_FEE = 1;
 
     function _afterInitialize(address, PoolKey calldata key, uint160, int24)
         internal
@@ -59,8 +55,14 @@ contract Counter is BaseHook {
         returns (bytes4)
     {
         if (!key.fee.isDynamicFee()) revert NotDynamicFee();
-        poolManager.updateDynamicLPFee(key, _getInitFee(key));
+        poolManager.updateDynamicLPFee(key, INIT_FEE);
         return this.afterInitialize.selector;
+    }
+
+    function _getFee(PoolKey calldata key) internal virtual returns (uint24)
+    {
+    uint24 fee = 1;
+    return fee;
     }
 
     function _beforeSwap(address, PoolKey calldata key, SwapParams calldata, bytes calldata)
