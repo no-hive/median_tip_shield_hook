@@ -1,17 +1,29 @@
 {
   "lib/forge-std": {
-    "rev": "8bbcf6e3f8f62f419e5429a0bd89331c85c37824"
+    "tag": {
+      "name": "v1.16.2",
+      "rev": "bf647bd6046f2f7da30d0c2bf435e5c76a780c1b"
+    }
   },
   "lib/hookmate": {
-    "rev": "33408fbc15e083eb0bc4205fa37cb6ba0a926f44"
+    "tag": {
+      "name": "v0.6.0",
+      "rev": "ef3e9845e0b2bc9cd5810644d7d337b00c47bc75"
+    }
   },
   "lib/uniswap-hooks": {
-    "rev": "e59fe72c110c3862eec9b332530dce49ca506bbb"
+    "tag": {
+      "name": "v1.2.1",
+      "rev": "acbd604c409a827f7f98c9517236da860c4fca1a"
+    }
   },
   "lib/v4-core": {
     "tag": {
       "name": "v4.0.0",
       "rev": "e50237c43811bd9b526eff40f26772152a42daba"
     }
+  },
+  "lib/v4-periphery": {
+    "rev": "3245c3cb99c48fa1dc2459c3b60abc37d4294aba"
   }
 }
