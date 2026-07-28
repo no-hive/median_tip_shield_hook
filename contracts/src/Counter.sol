@@ -46,7 +46,11 @@ contract Counter is BaseHook {
     // -----------------------------------------------
     error NotDynamicFee();
 
-    function _getFee(PoolKey calldata key) internal virtual returns (uint24);
+    function _getFee(PoolKey calldata key) internal virtual returns (uint24)
+    {
+    uint24 fee = 1;
+    return fee;
+    }
 
     function _afterInitialize(address, PoolKey calldata key, uint160, int24)
         internal
