@@ -46,7 +46,7 @@ contract Counter is BaseHook {
     // -----------------------------------------------
     error NotDynamicFee();
 
-    function _getFee(PoolKey calldata key) internal virtual returns (uint24)
+    function _getInitFee(PoolKey calldata key) internal virtual returns (uint24)
     {
     uint24 fee = 1;
     return fee;
@@ -59,7 +59,7 @@ contract Counter is BaseHook {
         returns (bytes4)
     {
         if (!key.fee.isDynamicFee()) revert NotDynamicFee();
-        poolManager.updateDynamicLPFee(key, _getFee(key));
+        poolManager.updateDynamicLPFee(key, _getInitFee(key));
         return this.afterInitialize.selector;
     }
 
@@ -69,6 +69,6 @@ contract Counter is BaseHook {
         returns (bytes4, BeforeSwapDelta, uint24)
     {
         uint24 fee = 1;
-        return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee);
+        return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee | LPFeeLibrary.OVERRIDE_FEE_FLAG);
     }
 }
