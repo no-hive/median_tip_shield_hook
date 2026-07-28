@@ -28,14 +28,14 @@ contract Counter is BaseHook {
 
     function getHookPermissions() public pure override returns (Hooks.Permissions memory) {
         return Hooks.Permissions({
-            beforeInitialize: false,
+            beforeInitialize: true, // used to check pool has dymanic fees
             afterInitialize: false,
-            beforeAddLiquidity: true,
+            beforeAddLiquidity: false,
             afterAddLiquidity: false,
-            beforeRemoveLiquidity: true,
+            beforeRemoveLiquidity: false,
             afterRemoveLiquidity: false,
-            beforeSwap: true,
-            afterSwap: true,
+            beforeSwap: true, // used for custom fees logic
+            afterSwap: false,
             beforeDonate: false,
             afterDonate: false,
             beforeSwapReturnDelta: false,
