@@ -16,17 +16,12 @@ contract Counter is BaseHook {
     using PoolIdLibrary for PoolKey;
     using LPFeeLibrary for uint24;
 
-    // NOTE: ---------------------------------------------------------
-    // state variables should typically be uniffe to a pool
-    // a single hook contract should be able to service multiple pools
-    // ---------------------------------------------------------------
-
     constructor(IPoolManager _poolManager) BaseHook(_poolManager) {}
 
     function getHookPermissions() public pure override returns (Hooks.Permissions memory) {
         return Hooks.Permissions({
-            beforeInitialize: false, // used to check pool has dymanic fees
-            afterInitialize: true,
+            beforeInitialize: false,
+            afterInitialize: true, // used to check pool has dymanic fees
             beforeAddLiquidity: false,
             afterAddLiquidity: false,
             beforeRemoveLiquidity: false,
@@ -43,12 +38,14 @@ contract Counter is BaseHook {
     }
 
     // -----------------------------------------------
-    // NOTE: see IHooks.sol for function documentation
+    // ERRORS
     // -----------------------------------------------
-    error NotDynamicFee();
+
+    error NotDynamicFee(); // used in _afterInitialize to singal new pool has no dynamic fee.
 
     uint24 immutable INIT_FEE = 1;
 
+    //  If pool has no dynamic fee marker while being created, it means hook's logic will be useless.
     function _afterInitialize(address, PoolKey calldata key, uint160, int24)
         internal
         virtual
@@ -60,6 +57,8 @@ contract Counter is BaseHook {
         return this.afterInitialize.selector;
     }
 
+    // the function to ve used every swap to detect those who overuse priority fee and
+    // change fees to punish them accordingly.
     function _beforeSwap(address, PoolKey calldata key, SwapParams calldata, bytes calldata)
         internal
         override
@@ -77,6 +76,7 @@ contract Counter is BaseHook {
         return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee_ | LPFeeLibrary.OVERRIDE_FEE_FLAG);
     }
 
+    // struct that stores data on Median - one struct for all pools btw.
     struct MedianState {
         int120 approxMedian;
         int120 step;
@@ -85,6 +85,8 @@ contract Counter is BaseHook {
 
     MedianState public medianState;
 
+    // this function is important to keep the Median up to date after each swap. Uses
+    // FrugalMedianLIbrary for Math. Just passes all the data and update what library tells to update.
     function UpdateMedian(uint256 _priorityFee) internal {
         (int256 newMedian, int256 newStep, bool newPositive) = FrugalMedianLibrary.updateApproxMedian(
             int256(_priorityFee), medianState.approxMedian, medianState.step, medianState.positive
@@ -94,6 +96,8 @@ contract Counter is BaseHook {
         medianState.positive = newPositive;
     }
 
+    // will only work in EIP-1559 transactions because priority fee only exists there
+    // so in all other cases just pass zero priority fee value.
     function getPriorityFee() internal returns (uint256) {
         // Calculate priority fee
         uint256 priorityFee;
@@ -109,6 +113,7 @@ contract Counter is BaseHook {
         return priorityFee;
     }
 
+    // the Math for dynamic fee punishment
     function getFee_(uint256 priorityFee) internal virtual returns (uint24) {
         // Find out ratio
 
