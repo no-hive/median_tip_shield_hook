@@ -13,6 +13,7 @@ import {PoolIdLibrary} from "@uniswap/v4-core/src/types/PoolId.sol";
 import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "@uniswap/v4-core/src/types/BeforeSwapDelta.sol";
 import {LPFeeLibrary} from "@uniswap/v4-core/src/libraries/LPFeeLibrary.sol";
 import {FrugalMedianLibrary} from "./lib/FrugalMedianLibrary.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 // -----------------------------------------------
 //  CONTRACT
@@ -21,6 +22,7 @@ import {FrugalMedianLibrary} from "./lib/FrugalMedianLibrary.sol";
 contract Counter is BaseHook {
     using PoolIdLibrary for PoolKey;
     using LPFeeLibrary for uint24;
+    using SafeCast for uint256;
 
     // -----------------------------------------------
     // CONSTRUCTOR
@@ -159,7 +161,7 @@ contract Counter is BaseHook {
 
         //  if (medianFee == 0) return BASIC_FEE;  // check that basic fee is not zero
         // 2. get median_priority_fee
-        uint256 medianPriorityFee_ = uint256 (medianState.approxMedian);
+        uint256 medianPriorityFee_ = uint256(medianState.approxMedian);
         // Find out scaled ratio
 
         uint256 ratioScaled = (priorityFee * PRECISION) / medianPriorityFee_;
@@ -180,6 +182,6 @@ contract Counter is BaseHook {
 
         uint256 fee_ = BASIC_FEE + penalty;
 
-        return fee_;
+        return fee_.toUint24();
     }
 }
