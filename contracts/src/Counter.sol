@@ -60,18 +60,49 @@ contract Counter is BaseHook {
     }
 
     function getFee_() internal virtual returns (uint24) {
-        uint256 priority_fee;
+        // Calculate priority fee
+
+        uint256 priorityFee;
 
         uint256 effectiveGasPrice = tx.gasprice;
 
         uint256 baseFee = block.basefee;
 
-        if (effectiveGasPrice <= baseFee) priority_fee = 0;
+        if (effectiveGasPrice <= baseFee) priorityFee = 0;
 
-        priority_fee = effectiveGasPrice - baseFee;
+        priorityFee = effectiveGasPrice - baseFee;
 
-        uint24 fee = 1;
-        return fee;
+        // Find out ratio
+
+        uint256 PRECISION = 1000; // ratio precision (3 decimal places)
+        uint256 RATIO_THRESHOLD = 2700; // 2.7 * PRECISION
+        uint256 D_CAP = 7 * PRECISION; // with d >= 7, penalty is already at max (see below)
+        uint256 BASIC_FEE = 1000; // 0.1% in ppm (1_000_000 = 100%)
+        uint256 MAX_PENALTY_PERCENT = 50;
+        uint256 PENALTY_UNIT = 10000; // 1% => 10_000 in fee units
+        uint256 medianFee = 1; // CHANGE LATER
+
+        //  if (medianFee == 0) return BASIC_FEE;  // check that basic fee is not zero
+
+        // Find out scaled ratio
+
+        uint256 ratioScaled = (priorityFee * PRECISION) / medianFee;
+
+        uint256 penalty;
+        if (ratioScaled < RATIO_THRESHOLD) {
+            penalty = 0;
+        } else {
+            uint256 dScaled = ratioScaled - RATIO_THRESHOLD; // (ratio - 2.7) * PRECISION
+
+            if (dScaled >= D_CAP) {
+                penalty = MAX_PENALTY_PERCENT * PENALTY_UNIT;
+            } else {
+                uint256 x = (dScaled * dScaled * 100) / (98 * PRECISION * PRECISION);
+                penalty = x * PENALTY_UNIT;
+            }
+        }
+
+        uint256 fee_ = BASIC_FEE + penalty;
     }
 
     function _beforeSwap(address, PoolKey calldata key, SwapParams calldata, bytes calldata)
