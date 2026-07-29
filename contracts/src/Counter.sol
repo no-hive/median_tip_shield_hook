@@ -46,8 +46,6 @@ contract Counter is BaseHook {
     // EVENTS
     // -----------------------------------------------
 
-
-
     // -----------------------------------------------
     // VARIABLES
     // -----------------------------------------------
@@ -81,11 +79,9 @@ contract Counter is BaseHook {
     {
         // 1. get tx_priority_fee
         uint256 priorityFee_ = getPriorityFee();
-        // 2. get median_priority_fee
-        int120 medianPriorityFee_ = medianState.approxMedian;
-        // 3. dynamic fee punishment;
+        // 2. dynamic fee punishment;
         uint24 fee_ = getDynamicFee(priorityFee_);
-        // 4. update median_prority_fee
+        // 3. update median_prority_fee
         UpdateMedian(priorityFee_);
 
         return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee_ | LPFeeLibrary.OVERRIDE_FEE_FLAG);
@@ -133,10 +129,11 @@ contract Counter is BaseHook {
         // Find out ratio
 
         //  if (medianFee == 0) return BASIC_FEE;  // check that basic fee is not zero
-
+        // 2. get median_priority_fee
+        int120 medianPriorityFee_ = medianState.approxMedian;
         // Find out scaled ratio
 
-        uint256 ratioScaled = (priorityFee * PRECISION) / medianFee;
+        uint256 ratioScaled = (priorityFee * PRECISION) / medianPriorityFee_;
 
         uint256 penalty;
         if (ratioScaled < RATIO_THRESHOLD) {
