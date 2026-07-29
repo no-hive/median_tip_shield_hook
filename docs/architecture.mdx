@@ -1,0 +1,10 @@
+---
+title: "Architecture"
+description: "How the Median Tip Shield Hook processes transactions"
+---
+
+1. **Transaction arrives at the hook.** On a pool call (swap), the hook reads the transaction's priority fee before execution.
+2. **Compare against the median.** The priority fee is checked against a running median maintained by a Frugal-2U (streaming quantile) estimator.
+3. **Compute the swap fee.** The swap fee is scaled proportionally to how far the priority fee exceeds the median. The larger the excess, the higher the fee applied to the swap.
+4. **Distribute the fee.** All collected fees are routed to liquidity providers.
+5. **Update the median.** After the swap fee is charged, the transaction's priority fee is fed back into the estimator, correcting the median for subsequent transactions.

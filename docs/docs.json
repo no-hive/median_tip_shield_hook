@@ -16,8 +16,10 @@
             "group": "Get Started",
             "pages": [
               "introduction",
-              "quickstart",
-              "testing"
+              "architecture",
+              "concept",
+              "guides/deploy-pool",
+              "guides/deploy-hook"
             ]
           }
         ]
