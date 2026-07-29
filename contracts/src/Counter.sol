@@ -47,13 +47,6 @@ contract Counter is BaseHook {
     // -----------------------------------------------
     error NotDynamicFee();
 
-        struct MedianState {
-        int120 approxMedian;
-        int120 step;
-        bool positive;
-    }
-
-
     uint24 immutable INIT_FEE = 1;
 
     function _afterInitialize(address, PoolKey calldata key, uint160, int24)
@@ -67,7 +60,6 @@ contract Counter is BaseHook {
         return this.afterInitialize.selector;
     }
 
-
     function _beforeSwap(address, PoolKey calldata key, SwapParams calldata, bytes calldata)
         internal
         override
@@ -75,6 +67,23 @@ contract Counter is BaseHook {
     {
         uint24 fee_ = getFee_();
         return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee_ | LPFeeLibrary.OVERRIDE_FEE_FLAG);
+    }
+
+    struct MedianState {
+        int120 approxMedian;
+        int120 step;
+        bool positive;
+    }
+
+    MedianState public medianState;
+
+    function UpdateMedian(uint256 _priorityFee) internal {
+        (int256 newMedian, int256 newStep, bool newPositive) = FrugalMedianLibrary.updateApproxMedian(
+            int256(_priorityFee), medianState.approxMedian, medianState.step, medianState.positive
+        );
+        medianState.approxMedian = int120(newMedian);
+        medianState.step = int120(newStep);
+        medianState.positive = newPositive;
     }
 
     function getFee_() internal virtual returns (uint24) {
@@ -122,5 +131,4 @@ contract Counter is BaseHook {
 
         uint256 fee_ = BASIC_FEE + penalty;
     }
-
 }
