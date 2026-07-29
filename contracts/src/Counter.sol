@@ -10,6 +10,7 @@ import {PoolId, PoolIdLibrary} from "@uniswap/v4-core/src/types/PoolId.sol";
 import {BalanceDelta} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
 import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "@uniswap/v4-core/src/types/BeforeSwapDelta.sol";
 import {LPFeeLibrary} from "@uniswap/v4-core/src/libraries/LPFeeLibrary.sol";
+import {FrugalMedianLibrary} from "./lib/FrugalMedianLibrary.sol";
 
 contract Counter is BaseHook {
     using PoolIdLibrary for PoolKey;
@@ -45,6 +46,13 @@ contract Counter is BaseHook {
     // NOTE: see IHooks.sol for function documentation
     // -----------------------------------------------
     error NotDynamicFee();
+
+        struct MedianState {
+        int120 approxMedian;
+        int120 step;
+        bool positive;
+    }
+
 
     uint24 immutable INIT_FEE = 1;
 
