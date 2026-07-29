@@ -78,7 +78,6 @@ contract Counter is BaseHook {
     uint256 public immutable MAX_PENALTY_PERCENT = 50;
     // 1% => 10_000 in fee units
     uint256 public immutable PENALTY_UNIT = 10000;
-    uint24 public immutable INIT_FEE = 1;
 
     // -----------------------------------------------
     // MUTABLE VARIABLES
@@ -105,7 +104,7 @@ contract Counter is BaseHook {
         returns (bytes4)
     {
         if (!key.fee.isDynamicFee()) revert NotDynamicFee();
-        poolManager.updateDynamicLPFee(key, INIT_FEE);
+        poolManager.updateDynamicLPFee(key, BASIC_FEE);
         return this.afterInitialize.selector;
     }
 
