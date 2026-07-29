@@ -1,0 +1,11 @@
+{
+  "name": "My Project Docs",
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": [
+        "introduction"
+      ]
+    }
+  ]
+}
