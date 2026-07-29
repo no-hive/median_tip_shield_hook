@@ -42,7 +42,23 @@ contract Counter is BaseHook {
 
     error NotDynamicFee(); // used in _afterInitialize to singal new pool has no dynamic fee.
 
-    uint24 immutable INIT_FEE = 1;
+    // -----------------------------------------------
+    // EVENTS
+    // -----------------------------------------------
+
+
+
+    // -----------------------------------------------
+    // VARIABLES
+    // -----------------------------------------------
+
+    uint256 public immutable PRECISION = 1000; // ratio precision (3 decimal places)
+    uint256 public immutable RATIO_THRESHOLD = 2700; // 2.7 * PRECISION
+    uint256 public immutable D_CAP = 7 * PRECISION; // with d >= 7, penalty is already at max (see below)
+    uint256 public immutable BASIC_FEE = 1000; // 0.1% in ppm (1_000_000 = 100%)
+    uint256 public immutable MAX_PENALTY_PERCENT = 50;
+    uint256 public immutable PENALTY_UNIT = 10000; // 1% => 10_000 in fee units
+    uint24 public immutable INIT_FEE = 1;
 
     //  If pool has no dynamic fee marker while being created, it means hook's logic will be useless.
     function _afterInitialize(address, PoolKey calldata key, uint160, int24)
@@ -115,14 +131,6 @@ contract Counter is BaseHook {
     // the Math for dynamic fee punishment
     function getDynamicFee(uint256 priorityFee) internal virtual returns (uint24) {
         // Find out ratio
-
-        uint256 PRECISION = 1000; // ratio precision (3 decimal places)
-        uint256 RATIO_THRESHOLD = 2700; // 2.7 * PRECISION
-        uint256 D_CAP = 7 * PRECISION; // with d >= 7, penalty is already at max (see below)
-        uint256 BASIC_FEE = 1000; // 0.1% in ppm (1_000_000 = 100%)
-        uint256 MAX_PENALTY_PERCENT = 50;
-        uint256 PENALTY_UNIT = 10000; // 1% => 10_000 in fee units
-        uint256 medianFee = 1; // CHANGE LATER
 
         //  if (medianFee == 0) return BASIC_FEE;  // check that basic fee is not zero
 
