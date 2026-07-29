@@ -59,6 +59,16 @@ contract Counter is BaseHook {
         return this.afterInitialize.selector;
     }
 
+
+    function _beforeSwap(address, PoolKey calldata key, SwapParams calldata, bytes calldata)
+        internal
+        override
+        returns (bytes4, BeforeSwapDelta, uint24)
+    {
+        uint24 fee_ = getFee_();
+        return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee_ | LPFeeLibrary.OVERRIDE_FEE_FLAG);
+    }
+
     function getFee_() internal virtual returns (uint24) {
         // Calculate priority fee
 
@@ -105,12 +115,4 @@ contract Counter is BaseHook {
         uint256 fee_ = BASIC_FEE + penalty;
     }
 
-    function _beforeSwap(address, PoolKey calldata key, SwapParams calldata, bytes calldata)
-        internal
-        override
-        returns (bytes4, BeforeSwapDelta, uint24)
-    {
-        uint24 fee_ = getFee_();
-        return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee_ | LPFeeLibrary.OVERRIDE_FEE_FLAG);
-    }
 }
