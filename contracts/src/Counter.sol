@@ -71,9 +71,9 @@ contract Counter is BaseHook {
         // 3. uint24 fee_ = getFee_();
 
         // 4. update median_prority_fee
-        UpdateMedian();
+        UpdateMedian(1);
 
-        return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee_ | LPFeeLibrary.OVERRIDE_FEE_FLAG);
+        return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, 0); //fee_ | LPFeeLibrary.OVERRIDE_FEE_FLAG);
     }
 
     // struct that stores data on Median - one struct for all pools btw.
