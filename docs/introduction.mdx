@@ -5,29 +5,34 @@ description: "Median Tip Shield Hook for Uniswap v4"
 
 ## Overview
 
-**MPF Hook** (Median Tip Shield Hook) is a Uniswap v4 hook that protects liquidity providers from MEV extraction by using median-based tip analysis to detect and shield against sandwich attacks and price manipulation.
+**MPF Hook** is a Uniswap v4 hook that shields liquidity providers from MEV extraction. Instead of watching prices or trade sizes, it watches how aggressively users bid on priority fees, and charges an adaptive swap fee whenever a transaction looks like front-running.
 
-## Key Features
+Collected fees are redistributed to LPs, turning MEV pressure into compensation.
+
+## Learn
 
 <CardGroup cols={2}>
-  <Card title="Sandwich Protection" icon="shield">
-    Detects and mitigates sandwich attack patterns in real time.
+  <Card title="Architecture" icon="layers" href="/architecture">
+    The transaction flow, from priority-fee read to median update.
   </Card>
-  <Card title="Median-Based Analysis" icon="chart-line">
-    Uses median tip data to establish fair execution baselines.
-  </Card>
-  <Card title="Uniswap v4 Native" icon="code">
-    Built as a first-class hook for v4 pools.
-  </Card>
-  <Card title="Open Source" icon="github">
-    Fully auditable at [no-hive/median_tip_shield_hook](https://github.com/no-hive/median_tip_shield_hook).
+
+  <Card title="Concept" icon="lightbulb" href="/concept">
+    Why priority fees are the right signal, and how the shared oracle works.
   </Card>
 </CardGroup>
 
-## How It Works
+## Get started
 
-The hook intercepts swap operations on Uniswap v4 pools and evaluates transaction tips against a rolling median. Transactions that deviate suspiciously from the median are flagged as likely MEV activity and can be blocked or repriced to protect LPs.
+<CardGroup cols={2}>
+  <Card title="Deploy pool" icon="droplet" href="/guides/deploy-pool">
+    Spin up a Uniswap v4 pool wired to MPF Hook.
+  </Card>
 
-## Next Steps
+  <Card title="Deploy hook" icon="shield" href="/guides/deploy-hook">
+    Deploy your own instance of the hook contract.
+  </Card>
+</CardGroup>
 
-Head to the [Quickstart](/quickstart) to install and integrate the hook into your pool.
+## Open source
+
+Fully auditable at [no-hive/median\_tip\_shield\_hook](https://github.com/no-hive/median_tip_shield_hook).
