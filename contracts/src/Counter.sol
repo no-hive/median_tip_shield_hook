@@ -151,6 +151,7 @@ contract Counter is BaseHook {
         } else {
             priorityFee = tx.gasprice - block.basefee;
         }
+        return priorityFee;
     }
 
     // the Math for dynamic fee punishment
