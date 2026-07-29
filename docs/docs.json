@@ -1,11 +1,23 @@
 {
-  "name": "My Project Docs",
-  "navigation": [
-    {
-      "group": "Getting Started",
-      "pages": [
-        "introduction"
-      ]
-    }
-  ]
+  "$schema": "https://mintlify.com/schema.json",
+  "theme": "mint",
+  "name": "MPF Hook",
+  "colors": {
+    "primary": "#0D9373",
+    "light": "#55D799",
+    "dark": "#0D9373"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["introduction", "quickstart"]
+          }
+        ]
+      }
+    ]
+  }
 }
