@@ -65,7 +65,6 @@ contract Counter is BaseHook {
         override
         returns (bytes4, BeforeSwapDelta, uint24)
     {
-
         // 1. get tx_priority_fee
 
         // 2. get median_priority_fee
@@ -95,9 +94,8 @@ contract Counter is BaseHook {
         medianState.positive = newPositive;
     }
 
-    function getFee_() internal virtual returns (uint24) {
+    function getPriorityFee() internal returns (uint256) {
         // Calculate priority fee
-
         uint256 priorityFee;
 
         uint256 effectiveGasPrice = tx.gasprice;
@@ -108,6 +106,10 @@ contract Counter is BaseHook {
 
         priorityFee = effectiveGasPrice - baseFee;
 
+        return priorityFee;
+    }
+
+    function getFee_(uint256 priorityFee) internal virtual returns (uint24) {
         // Find out ratio
 
         uint256 PRECISION = 1000; // ratio precision (3 decimal places)
