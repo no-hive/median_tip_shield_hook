@@ -1,0 +1,33 @@
+---
+title: "Introduction"
+description: "Median Tip Shield Hook for Uniswap v4"
+---
+
+## Overview
+
+**MPF Hook** (Median Tip Shield Hook) is a Uniswap v4 hook that protects liquidity providers from MEV extraction by using median-based tip analysis to detect and shield against sandwich attacks and price manipulation.
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Sandwich Protection" icon="shield">
+    Detects and mitigates sandwich attack patterns in real time.
+  </Card>
+  <Card title="Median-Based Analysis" icon="chart-line">
+    Uses median tip data to establish fair execution baselines.
+  </Card>
+  <Card title="Uniswap v4 Native" icon="code">
+    Built as a first-class hook for v4 pools.
+  </Card>
+  <Card title="Open Source" icon="github">
+    Fully auditable at [no-hive/median_tip_shield_hook](https://github.com/no-hive/median_tip_shield_hook).
+  </Card>
+</CardGroup>
+
+## How It Works
+
+The hook intercepts swap operations on Uniswap v4 pools and evaluates transaction tips against a rolling median. Transactions that deviate suspiciously from the median are flagged as likely MEV activity and can be blocked or repriced to protect LPs.
+
+## Next Steps
+
+Head to the [Quickstart](/quickstart) to install and integrate the hook into your pool.
