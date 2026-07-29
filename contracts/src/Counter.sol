@@ -65,7 +65,16 @@ contract Counter is BaseHook {
         override
         returns (bytes4, BeforeSwapDelta, uint24)
     {
-        uint24 fee_ = getFee_();
+
+        // 1. get tx_priority_fee
+
+        // 2. get median_priority_fee
+
+        // 3. uint24 fee_ = getFee_();
+
+        // 4. update median_prority_fee
+        UpdateMedian();
+
         return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee_ | LPFeeLibrary.OVERRIDE_FEE_FLAG);
     }
 
