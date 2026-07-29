@@ -1,20 +1,21 @@
 name: Coverage
-
 on:
   push:
     branches: [main]
   pull_request:
-
 permissions:
   contents: write
-
 jobs:
   coverage:
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: contracts
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -28,13 +29,10 @@ jobs:
       - name: Generate coverage.json
         run: |
           COVERAGE=$(cat coverage.txt | grep "Total" | awk '{print $4}' | tr -d '%')
-
           echo "Coverage: $COVERAGE"
-
           COLOR="red"
           if (( $(echo "$COVERAGE >= 80" | bc -l) )); then COLOR="yellow"; fi
           if (( $(echo "$COVERAGE >= 90" | bc -l) )); then COLOR="brightgreen"; fi
-
           echo "{\"schemaVersion\":1,\"label\":\"coverage\",\"message\":\"${COVERAGE}%\",\"color\":\"${COLOR}\"}" > coverage.json
 
       - name: Deploy coverage.json to gh-pages
@@ -42,4 +40,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: .
+          publish_dir: contracts
