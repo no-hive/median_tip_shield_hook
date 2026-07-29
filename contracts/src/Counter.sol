@@ -64,15 +64,15 @@ contract Counter is BaseHook {
         returns (bytes4, BeforeSwapDelta, uint24)
     {
         // 1. get tx_priority_fee
-
+        uint256 priorityFee_ = getPriorityFee();
         // 2. get median_priority_fee
-
-        // 3. uint24 fee_ = getFee_();
-
+        int120 medianPriorityFee_ = medianState.approxMedian;
+        // 3. dynamic fee punishment;
+        uint24 fee_ = getDynamicFee(priorityFee_);
         // 4. update median_prority_fee
-        UpdateMedian(1);
+        UpdateMedian(priorityFee_);
 
-        return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, 0); //fee_ | LPFeeLibrary.OVERRIDE_FEE_FLAG);
+        return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee_ | LPFeeLibrary.OVERRIDE_FEE_FLAG);
     }
 
     // struct that stores data on Median - one struct for all pools btw.
@@ -113,7 +113,7 @@ contract Counter is BaseHook {
     }
 
     // the Math for dynamic fee punishment
-    function getFee_(uint256 priorityFee) internal virtual returns (uint24) {
+    function getDynamicFee(uint256 priorityFee) internal virtual returns (uint24) {
         // Find out ratio
 
         uint256 PRECISION = 1000; // ratio precision (3 decimal places)
