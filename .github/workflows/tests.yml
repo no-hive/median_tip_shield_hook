@@ -1,4 +1,4 @@
-name: foundry tests
+name: tests
 
 on:
   push:
