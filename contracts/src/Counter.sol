@@ -86,8 +86,8 @@ contract Counter is BaseHook {
 
     // struct that stores data on Median - one struct for all pools btw.
     struct MedianState {
-        int120 approxMedian;
-        int120 step;
+        int256 approxMedian;
+        int256 step;
         bool positive;
     }
 
@@ -136,8 +136,8 @@ contract Counter is BaseHook {
         (int256 newMedian, int256 newStep, bool newPositive) = FrugalMedianLibrary.updateApproxMedian(
             int256(_priorityFee), medianState.approxMedian, medianState.step, medianState.positive
         );
-        medianState.approxMedian = int120(newMedian);
-        medianState.step = int120(newStep);
+        medianState.approxMedian = newMedian;
+        medianState.step = newStep;
         medianState.positive = newPositive;
     }
 
@@ -160,7 +160,7 @@ contract Counter is BaseHook {
 
         //  if (medianFee == 0) return BASIC_FEE;  // check that basic fee is not zero
         // 2. get median_priority_fee
-        int120 medianPriorityFee_ = medianState.approxMedian;
+        uint256 medianPriorityFee_ = uint256 (medianState.approxMedian);
         // Find out scaled ratio
 
         uint256 ratioScaled = (priorityFee * PRECISION) / medianPriorityFee_;
@@ -180,5 +180,7 @@ contract Counter is BaseHook {
         }
 
         uint256 fee_ = BASIC_FEE + penalty;
+
+        return fee_;
     }
 }
