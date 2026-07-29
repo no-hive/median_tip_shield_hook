@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-import {BaseHook} from "@openzeppelin/uniswap-hooks/src/base/BaseHook.sol";
+// -----------------------------------------------
+//  IMPORTS
+// -----------------------------------------------
 
+import {BaseHook} from "@openzeppelin/uniswap-hooks/src/base/BaseHook.sol";
 import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
 import {IPoolManager, SwapParams} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
@@ -11,11 +14,23 @@ import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "@uniswap/v4-core/src/type
 import {LPFeeLibrary} from "@uniswap/v4-core/src/libraries/LPFeeLibrary.sol";
 import {FrugalMedianLibrary} from "./lib/FrugalMedianLibrary.sol";
 
+// -----------------------------------------------
+//  CONTRACT
+// -----------------------------------------------
+
 contract Counter is BaseHook {
     using PoolIdLibrary for PoolKey;
     using LPFeeLibrary for uint24;
 
+    // -----------------------------------------------
+    // CONSTRUCTOR
+    // -----------------------------------------------
+
     constructor(IPoolManager _poolManager) BaseHook(_poolManager) {}
+
+    // -----------------------------------------------
+    // HOOK PERMISSIONS
+    // -----------------------------------------------
 
     function getHookPermissions() public pure override returns (Hooks.Permissions memory) {
         return Hooks.Permissions({
@@ -40,23 +55,47 @@ contract Counter is BaseHook {
     // ERRORS
     // -----------------------------------------------
 
-    error NotDynamicFee(); // used in _afterInitialize to singal new pool has no dynamic fee.
+    // used in _afterInitialize to singal new pool has no dynamic fee.
+    error NotDynamicFee();
 
     // -----------------------------------------------
     // EVENTS
     // -----------------------------------------------
 
     // -----------------------------------------------
-    // VARIABLES
+    // IMMUNTALE VARIABLES
     // -----------------------------------------------
 
-    uint256 public immutable PRECISION = 1000; // ratio precision (3 decimal places)
-    uint256 public immutable RATIO_THRESHOLD = 2700; // 2.7 * PRECISION
-    uint256 public immutable D_CAP = 7 * PRECISION; // with d >= 7, penalty is already at max (see below)
-    uint256 public immutable BASIC_FEE = 1000; // 0.1% in ppm (1_000_000 = 100%)
+    // ratio precision (3 decimal places)
+    uint256 public immutable PRECISION = 1000;
+    // 2.7 * PRECISION
+    uint256 public immutable RATIO_THRESHOLD = 2700;
+    // with d >= 7, penalty is already at max (see below)
+    uint256 public immutable D_CAP = 7 * PRECISION;
+    // 0.1% in ppm (1_000_000 = 100%)
+    uint256 public immutable BASIC_FEE = 1000;
+    // max penality is created to keep punishment up to 50% of the swap amount
     uint256 public immutable MAX_PENALTY_PERCENT = 50;
-    uint256 public immutable PENALTY_UNIT = 10000; // 1% => 10_000 in fee units
+    // 1% => 10_000 in fee units
+    uint256 public immutable PENALTY_UNIT = 10000;
     uint24 public immutable INIT_FEE = 1;
+
+    // -----------------------------------------------
+    // MUTABLE VARIABLES
+    // -----------------------------------------------
+
+    // struct that stores data on Median - one struct for all pools btw.
+    struct MedianState {
+        int120 approxMedian;
+        int120 step;
+        bool positive;
+    }
+
+    MedianState public medianState;
+
+    // -----------------------------------------------
+    // OVERRIDE FUNCTOINS
+    // -----------------------------------------------
 
     //  If pool has no dynamic fee marker while being created, it means hook's logic will be useless.
     function _afterInitialize(address, PoolKey calldata key, uint160, int24)
@@ -87,14 +126,9 @@ contract Counter is BaseHook {
         return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee_ | LPFeeLibrary.OVERRIDE_FEE_FLAG);
     }
 
-    // struct that stores data on Median - one struct for all pools btw.
-    struct MedianState {
-        int120 approxMedian;
-        int120 step;
-        bool positive;
-    }
-
-    MedianState public medianState;
+    // -----------------------------------------------
+    //  ADDITIONAL FUNCTIONS
+    // -----------------------------------------------
 
     // this function is important to keep the Median up to date after each swap. Uses
     // FrugalMedianLIbrary for Math. Just passes all the data and update what library tells to update.
