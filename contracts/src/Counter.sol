@@ -75,7 +75,7 @@ contract Counter is BaseHook {
     // with d >= 7, penalty is already at max (see below)
     uint256 public immutable D_CAP = 7 * PRECISION;
     // 0.1% in ppm (1_000_000 = 100%)
-    uint256 public immutable BASIC_FEE = 1000;
+    uint24 public immutable BASIC_FEE = 1000;
     // max penality is created to keep punishment up to 50% of the swap amount
     uint256 public immutable MAX_PENALTY_PERCENT = 50;
     // 1% => 10_000 in fee units
@@ -180,8 +180,8 @@ contract Counter is BaseHook {
             }
         }
 
-        uint256 fee_ = BASIC_FEE + penalty;
+        uint24 fee_ = BASIC_FEE + penalty.toUint24();
 
-        return fee_.toUint24();
+        return fee_;
     }
 }
