@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// This lib is part of https://github.com/saucepoint/median-oracles project. Thanks to its creator!
 pragma solidity ^0.8.15;
 
 library FrugalMedianLibrary {
