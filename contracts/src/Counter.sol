@@ -13,7 +13,7 @@ import {LPFeeLibrary} from "@uniswap/v4-core/src/libraries/LPFeeLibrary.sol";
 
 contract Counter is BaseHook {
     using PoolIdLibrary for PoolKey;
-      using LPFeeLibrary for uint24;
+    using LPFeeLibrary for uint24;
 
     // NOTE: ---------------------------------------------------------
     // state variables should typically be uniffe to a pool
@@ -59,10 +59,19 @@ contract Counter is BaseHook {
         return this.afterInitialize.selector;
     }
 
-    function _getFee () internal virtual returns (uint24)
-    {
-    uint24 fee = 1;
-    return fee;
+    function getFee_() internal virtual returns (uint24) {
+        uint256 priority_fee;
+
+        uint256 effectiveGasPrice = tx.gasprice;
+
+        uint256 baseFee = block.basefee;
+
+        if (effectiveGasPrice <= baseFee) priority_fee = 0;
+
+        priority_fee = effectiveGasPrice - baseFee;
+
+        uint24 fee = 1;
+        return fee;
     }
 
     function _beforeSwap(address, PoolKey calldata key, SwapParams calldata, bytes calldata)
@@ -70,7 +79,7 @@ contract Counter is BaseHook {
         override
         returns (bytes4, BeforeSwapDelta, uint24)
     {
-        uint24 fee_ = _getFee();
+        uint24 fee_ = getFee_();
         return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee_ | LPFeeLibrary.OVERRIDE_FEE_FLAG);
     }
 }
