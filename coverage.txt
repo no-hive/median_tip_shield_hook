@@ -1,5 +1,5 @@
 Compiling 92 files with Solc 0.8.30
-Solc 0.8.30 finished in 1.09s
+Solc 0.8.30 finished in 1.16s
 Compiler run successful with warnings:
 Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
   --> src/lib/FrugalMedianLibrary.sol:53:28:
@@ -29,14 +29,14 @@ Ran 6 tests for test/utils/libraries/EasyPosm.t.sol:EasyPosmTest
 [PASS] test_increaseLiquidityNative() (gas: 471914)
 [PASS] test_mintLiquidity() (gas: 443626)
 [PASS] test_mintLiquidityNative() (gas: 392737)
-Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 8.02ms (12.58ms CPU time)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 10.20ms (12.21ms CPU time)
 
 Ran 2 tests for test/MPFHook.t.sol:MPFHookTest
 [PASS] testFirstSwap() (gas: 150788)
 [PASS] testSwapWithHighPriorityFee() (gas: 699302)
-Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 11.27ms (6.12ms CPU time)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 12.15ms (9.73ms CPU time)
 
-Ran 2 test suites in 11.76ms (19.29ms CPU time): 8 tests passed, 0 failed, 0 skipped (8 total tests)
+Ran 2 test suites in 12.66ms (22.34ms CPU time): 8 tests passed, 0 failed, 0 skipped (8 total tests)
 
 ╭-------------------------------------------+------------------+------------------+----------------+----------------╮
 | File                                      | % Lines          | % Statements     | % Branches     | % Funcs        |
