@@ -11,6 +11,8 @@ import {StateLibrary} from "@uniswap/v4-core/src/libraries/StateLibrary.sol";
 import {BaseScript} from "./base/BaseScript.sol";
 import {LiquidityHelpers} from "./base/LiquidityHelpers.sol";
 
+import {LPFeeLibrary} from "@uniswap/v4-core/src/libraries/LPFeeLibrary.sol";
+
 contract AddLiquidityScript is BaseScript, LiquidityHelpers {
     using CurrencyLibrary for Currency;
     using StateLibrary for IPoolManager;
@@ -19,7 +21,7 @@ contract AddLiquidityScript is BaseScript, LiquidityHelpers {
     // --- Configure These ---
     /////////////////////////////////////
 
-    uint24 lpFee = 3000; // 0.30%
+    uint24 lpFee = LPFeeLibrary.DYNAMIC_FEE_FLAG; // 0.30%
     int24 tickSpacing = 60;
 
     // --- liquidity position configuration --- //
