@@ -18,10 +18,10 @@ import {Constants} from "@uniswap/v4-core/test/utils/Constants.sol";
 
 import {EasyPosm} from "./utils/libraries/EasyPosm.sol";
 
-import {Counter} from "../src/Counter.sol";
+import {MedianPriorityFeeHook} from "../src/MPFHook.sol";
 import {BaseTest} from "./utils/BaseTest.sol";
 
-contract CounterTest is BaseTest {
+contract MPFHookTest is BaseTest {
     using EasyPosm for IPositionManager;
     using PoolIdLibrary for PoolKey;
     using CurrencyLibrary for Currency;
@@ -32,7 +32,7 @@ contract CounterTest is BaseTest {
 
     PoolKey poolKey;
 
-    Counter hook;
+    MedianPriorityFeeHook hook;
     PoolId poolId;
 
     uint256 tokenId;
@@ -46,15 +46,10 @@ contract CounterTest is BaseTest {
         (currency0, currency1) = deployCurrencyPair();
 
         // Deploy the hook to an address with the correct flags
-        address flags = address(
-            uint160(
-                Hooks.BEFORE_SWAP_FLAG | Hooks.AFTER_SWAP_FLAG | Hooks.BEFORE_ADD_LIQUIDITY_FLAG
-                    | Hooks.BEFORE_REMOVE_LIQUIDITY_FLAG
-            ) ^ (0x4444 << 144) // Namespace the hook to avoid collisions
-        );
+        address flags = address(uint160(Hooks.AFTER_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG) ^ (0x4444 << 144));
         bytes memory constructorArgs = abi.encode(poolManager); // Add all the necessary constructor arguments from the hook
-        deployCodeTo("Counter.sol:Counter", constructorArgs, flags);
-        hook = Counter(flags);
+        deployCodeTo("MPFHook.sol:MedianPriorityFeeHook", constructorArgs, flags);
+        hook = MedianPriorityFeeHook(flags);
 
         // Create the pool
         poolKey = PoolKey(currency0, currency1, 3000, 60, IHooks(hook));
@@ -87,15 +82,7 @@ contract CounterTest is BaseTest {
         );
     }
 
-    function testCounterHooks() public {
-        // positions were created in setup()
-        assertEq(hook.beforeAddLiquidityCount(poolId), 1);
-        assertEq(hook.beforeRemoveLiquidityCount(poolId), 0);
-
-        assertEq(hook.beforeSwapCount(poolId), 0);
-        assertEq(hook.afterSwapCount(poolId), 0);
-
-        // Perform a test swap //
+    function testHookExists() public {
         uint256 amountIn = 1e18;
         BalanceDelta swapDelta = swapRouter.swapExactTokensForTokens({
             amountIn: amountIn,
@@ -106,32 +93,5 @@ contract CounterTest is BaseTest {
             receiver: address(this),
             deadline: block.timestamp + 1
         });
-        // ------------------- //
-
-        assertEq(int256(swapDelta.amount0()), -int256(amountIn));
-
-        assertEq(hook.beforeSwapCount(poolId), 1);
-        assertEq(hook.afterSwapCount(poolId), 1);
-    }
-
-    function testLiquidityHooks() public {
-        // positions were created in setup()
-        assertEq(hook.beforeAddLiquidityCount(poolId), 1);
-        assertEq(hook.beforeRemoveLiquidityCount(poolId), 0);
-
-        // remove liquidity
-        uint256 liquidityToRemove = 1e18;
-        positionManager.decreaseLiquidity(
-            tokenId,
-            liquidityToRemove,
-            0, // Max slippage, token0
-            0, // Max slippage, token1
-            address(this),
-            block.timestamp,
-            Constants.ZERO_BYTES
-        );
-
-        assertEq(hook.beforeAddLiquidityCount(poolId), 1);
-        assertEq(hook.beforeRemoveLiquidityCount(poolId), 1);
     }
 }
