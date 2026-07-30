@@ -19,7 +19,7 @@ import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 //  CONTRACT
 // -----------------------------------------------
 
-contract Counter is BaseHook {
+contract MedianPriorityFeeHook is BaseHook {
     using PoolIdLibrary for PoolKey;
     using LPFeeLibrary for uint24;
     using SafeCast for uint256;
