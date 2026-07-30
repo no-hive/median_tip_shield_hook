@@ -144,7 +144,7 @@ contract Counter is BaseHook {
 
     // will only work in EIP-1559 transactions because priority fee only exists there
     // so in all other cases just pass zero priority fee value.
-    function getPriorityFee() internal returns (uint256) {
+    function getPriorityFee() internal view returns (uint256) {
         uint256 priorityFee;
         // Calculate priority fee
         if (tx.gasprice <= block.basefee) {
