@@ -116,4 +116,33 @@ contract MPFHookTest is BaseTest {
             "actual balance delta != swapDelta.amount1"
         );
     }
+
+    function testSwapWithHighPriorityFee() public {
+        for (uint256 i = 0; i < 10; i++) {
+            _helpSwapWithHighPriorityFee();
+        }
+
+        (int256 approxMedian,,) = hook.medianState();
+
+        assertGt(approxMedian, 10, "approxMedian should be > 10 gwei");
+    }
+
+    function _helpSwapWithHighPriorityFee() internal {
+        uint256 amountIn = 1e18;
+        uint256 baseFee = 10 gwei;
+        uint256 priorityFee = 50 gwei;
+
+        vm.fee(baseFee);
+        vm.txGasPrice(baseFee + priorityFee);
+
+        swapRouter.swapExactTokensForTokens({
+            amountIn: amountIn,
+            amountOutMin: 0,
+            zeroForOne: true,
+            poolKey: poolKey,
+            hookData: Constants.ZERO_BYTES,
+            receiver: address(this),
+            deadline: block.timestamp + 1
+        });
+    }
 }
