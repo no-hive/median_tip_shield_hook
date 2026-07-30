@@ -13,12 +13,6 @@ Warning (5667): Unused function parameter. Remove or comment out the variable na
 115 |     function _beforeSwap(address, PoolKey calldata key, SwapParams calldata, bytes calldata)
     |                                   ^^^^^^^^^^^^^^^^^^^^
 
-Warning (2072): Unused local variable.
-  --> test/MPFHook.t.sol:88:9:
-   |
-88 |         BalanceDelta swapDelta = swapRouter.swapExactTokensForTokens({
-   |         ^^^^^^^^^^^^^^^^^^^^^^
-
 Warning (2018): Function state mutability can be restricted to view
   --> script/base/BaseScript.sol:70:5:
    |
@@ -29,8 +23,8 @@ Analysing contracts...
 Running tests...
 
 Ran 1 test for test/MPFHook.t.sol:MPFHookTest
-[PASS] testHookExists() (gas: 138228)
-Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 5.68ms (1.38ms CPU time)
+[PASS] testFirstSwap() (gas: 150788)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 6.82ms (1.46ms CPU time)
 
 Ran 6 tests for test/utils/libraries/EasyPosm.t.sol:EasyPosmTest
 [PASS] test_burn() (gas: 400756)
@@ -39,9 +33,9 @@ Ran 6 tests for test/utils/libraries/EasyPosm.t.sol:EasyPosmTest
 [PASS] test_increaseLiquidityNative() (gas: 471914)
 [PASS] test_mintLiquidity() (gas: 443626)
 [PASS] test_mintLiquidityNative() (gas: 392737)
-Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 10.51ms (16.56ms CPU time)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 8.57ms (15.59ms CPU time)
 
-Ran 2 test suites in 11.46ms (16.19ms CPU time): 7 tests passed, 0 failed, 0 skipped (7 total tests)
+Ran 2 test suites in 10.51ms (15.39ms CPU time): 7 tests passed, 0 failed, 0 skipped (7 total tests)
 
 ╭-------------------------------------------+------------------+------------------+---------------+----------------╮
 | File                                      | % Lines          | % Statements     | % Branches    | % Funcs        |
