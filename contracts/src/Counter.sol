@@ -174,8 +174,7 @@ contract Counter is BaseHook {
             if (dScaled >= D_CAP) {
                 penalty = MAX_PENALTY_PERCENT * PENALTY_UNIT;
             } else {
-                uint256 x = (dScaled * dScaled * 100) / (98 * PRECISION * PRECISION);
-                penalty = x * PENALTY_UNIT;
+                penalty = (dScaled * dScaled * MAX_PENALTY_PERCENT * PENALTY_UNIT) / (D_CAP * D_CAP);
             }
         }
 
