@@ -83,8 +83,14 @@ contract MPFHookTest is BaseTest {
         );
     }
 
-    function testHookExists() public {
+    // this function tests if the swap really occuries
+    // while interacting with the pool woth hook connected.
+    function testFirstSwap() public {
         uint256 amountIn = 1e18;
+
+        uint256 balance0Before = currency0.balanceOf(address(this));
+        uint256 balance1Before = currency1.balanceOf(address(this));
+
         BalanceDelta swapDelta = swapRouter.swapExactTokensForTokens({
             amountIn: amountIn,
             amountOutMin: 0, // Very bad, but we want to allow for unlimited price impact
@@ -94,5 +100,20 @@ contract MPFHookTest is BaseTest {
             receiver: address(this),
             deadline: block.timestamp + 1
         });
+
+        uint256 balance0After = currency0.balanceOf(address(this));
+        uint256 balance1After = currency1.balanceOf(address(this));
+
+        assertEq(balance0Before - balance0After, amountIn, "token0 balance change != amountIn");
+        assertGt(balance1After, balance1Before, "token1 balance did not increase");
+
+        assertEq(swapDelta.amount0(), -int128(int256(amountIn)), "swapDelta.amount0 mismatch");
+        assertGt(swapDelta.amount1(), 0, "swapDelta.amount1 should be positive");
+
+        assertEq(
+            balance1After - balance1Before,
+            uint256(int256(swapDelta.amount1())),
+            "actual balance delta != swapDelta.amount1"
+        );
     }
 }
