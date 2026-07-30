@@ -35,5 +35,8 @@
         ]
       }
     ]
+  },
+  "icons": {
+    "library": "lucide"
   }
 }
