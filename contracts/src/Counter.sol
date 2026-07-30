@@ -158,11 +158,10 @@ contract Counter is BaseHook {
     // the Math for dynamic fee punishment
     function getDynamicFee(uint256 priorityFee) internal virtual returns (uint24) {
         // Find out ratio
-
-        //  if (medianFee == 0) return BASIC_FEE;  // check that basic fee is not zero
         // 2. get median_priority_fee
         uint256 medianPriorityFee_ = uint256(medianState.approxMedian);
         // Find out scaled ratio
+        if (medianPriorityFee_ == 0) return BASIC_FEE; // check that basic fee is not zero
 
         uint256 ratioScaled = (priorityFee * PRECISION) / medianPriorityFee_;
 
