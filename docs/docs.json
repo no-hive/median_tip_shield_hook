@@ -16,10 +16,10 @@
             "group": "Overview",
             "pages": [
               "introduction",
-              "architecture",
               "concept",
+              "architecture",
               "logic",
-              "untitled-page"
+              "dynamic-fee-penalty-math"
             ]
           }
         ]

@@ -1,6 +1,7 @@
 ---
 title: "Introduction"
 description: "Median Tip Shield Hook for Uniswap v4"
+icon: "book-open"
 ---
 
 ## Overview
@@ -9,15 +10,39 @@ description: "Median Tip Shield Hook for Uniswap v4"
 
 Collected fees are redistributed to LPs, turning MEV pressure into compensation.
 
+## Why MPF Hook
+
+<CardGroup cols={3}>
+  <Card title="Median Oracle" color="#e10196" icon="activity">
+    A shared, on-chain pulse of priority-fee activity that stays calibrated even for thin pools.
+  </Card>
+
+  <Card title="Dynamic Fees" color="#e10196" icon="bug-off">
+    Adaptive swap fees that make MEV bots pay for the block space they try to steal.
+  </Card>
+
+  <Card title="On-chain Only" color="#e10196" icon="bow-arrow">
+    No off-chain oracles, no trusted operators. All logic lives inside the hook.
+  </Card>
+</CardGroup>
+
 ## Learn
 
 <CardGroup cols={2}>
+  <Card title="Concept" icon="lightbulb" href="/concept">
+    Why priority fees are the right signal, and how the shared oracle works.
+  </Card>
+
   <Card title="Architecture" icon="layers" href="/architecture">
     The transaction flow, from priority-fee read to median update.
   </Card>
 
-  <Card title="Concept" icon="lightbulb" href="/concept">
-    Why priority fees are the right signal, and how the shared oracle works.
+  <Card title="Median Priority Fee Hook" icon="gauge-high" href="/logic">
+    The full contract logic, permissions, and penalty formula.
+  </Card>
+
+  <Card title="Dynamic Fee Penalty: Math Derivation" icon="calculator" href="/dynamic-fee-penalty-math">
+    How the quadratic penalty formula is derived and turned into fixed-point Solidity.
   </Card>
 </CardGroup>
 
