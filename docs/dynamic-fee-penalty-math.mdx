@@ -1,0 +1,191 @@
+---
+title: "Dynamic Fee Penalty: Math Derivation"
+description: "How the quadratic penalty formula in getDynamicFee() was derived and converted to fixed-point Solidity arithmetic"
+icon: "calculator"
+---
+
+This page explains the mathematics behind the penalty term computed in
+`getDynamicFee()` in `MPFHook.sol`, and how the human-readable formula was
+turned into the fixed-point integer arithmetic used in Solidity.
+
+## Motivation
+
+The hook tracks a running approximate median of the priority fee paid across
+swaps (`medianState.approxMedian`, maintained by `FrugalMedianLibrary`). On
+every swap it compares the current transaction's priority fee against that
+median:
+
+```
+ratio = priorityFee / medianPriorityFee
+```
+
+<Info>
+A `ratio` close to `1` means the swapper is paying a "normal" priority fee.
+A `ratio` much larger than the median indicates the swapper is outbidding
+everyone else for block space — typically a sign of latency racing /
+front-running behavior around the swap.
+</Info>
+
+The hook's job is to make that behavior progressively more expensive by
+raising the LP fee for that swap, on top of the flat `BASIC_FEE`.
+
+## Original (floating-point) formula
+
+$$
+penalty = 50\% \times \min\left(1, \left(\frac{ratio - 2.7}{7}\right)^2\right)
+$$
+
+- Below `ratio = 2.7`, the swap is not penalized.
+- Above `2.7`, the penalty grows **quadratically** with the distance from
+  the threshold — small overshoots are cheap, large overshoots are punished
+  much more severely.
+- The `/7` sets the scale: once `ratio − 2.7` reaches `7` (i.e.
+  `ratio = 9.7`), the quadratic term reaches `1` and the `min(1, ...)` clamp
+  kicks in.
+- The outer `50%` caps the maximum possible penalty at half the swap amount,
+  so the fee can never exceed `BASIC_FEE + 50%`.
+
+## Algebraic simplification
+
+<Steps>
+  <Step title="Move the 50% inside the min">
+    Write `50%` as the decimal fraction `0.5` and pull it inside the `min`:
+
+    $$
+    penalty = \min\left(0.5,\ 0.5 \times \left(\frac{ratio - 2.7}{7}\right)^2\right)
+    $$
+  </Step>
+
+  <Step title="Substitute d = ratio - 2.7">
+    Let $d = ratio - 2.7$. Then:
+
+    $$
+    0.5 \times \left(\frac{d}{7}\right)^2 = 0.5 \times \frac{d^2}{49} = \frac{d^2}{98}
+    $$
+
+    since $98 = 2 \times 7^2 = 2 \times 49$.
+  </Step>
+
+  <Step title="Simplified formula">
+    $$
+    penalty = \min\left(0.5,\ \frac{d^2}{98}\right) \quad \text{(fraction, 0–0.5)}
+    $$
+
+    or in percent terms (0–50):
+
+    $$
+    penalty_{\%} = \min\left(50,\ \frac{d^2 \times 100}{98}\right)
+    $$
+  </Step>
+</Steps>
+
+<Tip>
+**Example** (`ratio = 3`): $d = 0.3$, $penalty = 0.3^2 / 98 \approx 0.000918$
+→ about `0.0918%`.
+</Tip>
+
+## From decimals to fixed-point integers (Solidity)
+
+Solidity has no floating point, so every quantity is scaled by a fixed
+`PRECISION` and all comparisons / `min` operations are re-expressed with
+integers.
+
+| Symbol (math)       | Solidity constant     | Value    | Meaning                                  |
+| -------------------- | ---------------------- | -------- | ------------------------------------------ |
+| `PRECISION`          | `PRECISION`            | `1000`   | 3 decimal places of fixed-point scaling    |
+| `2.7`                | `RATIO_THRESHOLD`      | `2700`   | `2.7 × PRECISION`                          |
+| `7` (cap distance)   | `D_CAP`                | `7000`   | `7 × PRECISION`                            |
+| `50%` (max penalty)  | `MAX_PENALTY_PERCENT`  | `50`     | maximum penalty, in percent                |
+| percent → fee units  | `PENALTY_UNIT`         | `10000`  | `1% = 10_000` fee units (ppm-style scale)  |
+
+### Scaled ratio and scaled distance
+
+```solidity
+ratioScaled = priorityFee * PRECISION / medianPriorityFee;  // ratio × 1000
+dScaled     = ratioScaled - RATIO_THRESHOLD;                 // (ratio − 2.7) × 1000
+```
+
+Because `dScaled = d × PRECISION` and `D_CAP = 7 × PRECISION`, the
+dimensionless ratio `d / 7` from the original formula is recovered exactly
+as `dScaled / D_CAP` — the `PRECISION` factor cancels out once the term is
+squared and divided consistently, which is exactly what the next step does.
+
+<Warning>
+Unlike the generic textbook formula (which is symmetric and clamps at
+`ratio ≈ 9.7` in either direction), the contract only ever evaluates the
+penalty for **overshoot in one direction** (`ratio ≥ 2.7`), because only an
+*abnormally high* priority fee relative to the median is considered
+suspicious. Ratios below `2.7` are never penalized.
+</Warning>
+
+```solidity
+if (ratioScaled < RATIO_THRESHOLD) {
+    penalty = 0;                                  // below 2.7 → no penalty
+} else if (dScaled >= D_CAP) {
+    penalty = MAX_PENALTY_PERCENT * PENALTY_UNIT;  // saturate at 50%
+} else {
+    penalty = (dScaled * dScaled * MAX_PENALTY_PERCENT * PENALTY_UNIT)
+              / (D_CAP * D_CAP);
+}
+```
+
+### Why this line is equivalent to the math above
+
+Starting from the percent form:
+
+$$
+penalty_{\%} = \min\left(50,\ \frac{d^2 \times 100}{98}\right) = \min\left(50,\ 50 \times \left(\frac{d}{7}\right)^2\right)
+$$
+
+Substitute $\frac{d}{7} = \frac{dScaled}{D\_CAP}$:
+
+$$
+penalty_{\%} = 50 \times \left(\frac{dScaled}{D\_CAP}\right)^2 \quad \text{(before the 50-cap is applied)}
+$$
+
+To convert a percent value into on-chain fee units, multiply by
+`PENALTY_UNIT` (`10 000` units = `1%`):
+
+$$
+penalty_{units} = penalty_{\%} \times PENALTY\_UNIT = \frac{dScaled^2 \times MAX\_PENALTY\_PERCENT \times PENALTY\_UNIT}{D\_CAP^2}
+$$
+
+which is exactly the `else` branch above.
+
+<Note>
+The `dScaled >= D_CAP` branch is the integer version of the `min(...)`
+clamp. Once `dScaled` reaches `D_CAP` (`ratio ≥ 2.7 + 7 = 9.7`), the
+quadratic term would exceed `1`, so the penalty is hard-capped at
+`MAX_PENALTY_PERCENT * PENALTY_UNIT` (50% expressed in fee units) instead of
+being computed further — this also avoids letting `dScaled * dScaled` grow
+unnecessarily large before the division, which matters for `uint256`
+overflow safety.
+</Note>
+
+### Final fee
+
+```solidity
+uint24 fee_ = BASIC_FEE + penalty.toUint24();
+```
+
+`BASIC_FEE` (`1000` units = `0.1%`) is the baseline swap fee; `penalty` is
+added on top, ranging from `0` up to `MAX_PENALTY_PERCENT * PENALTY_UNIT`
+(`500 000` units = `50%`), giving a maximum total fee of `50.1%` when a
+swap's priority fee is `≥ 9.7×` the running median.
+
+## Summary of the transformation chain
+
+```
+50% × min(1, ((ratio-2.7)/7)^2)
+        │  (pull 0.5 inside min, let d = ratio-2.7)
+        ▼
+min(0.5, d²/98)
+        │  (scale by PRECISION for Solidity integer math,
+        │   d → dScaled, 7 → D_CAP, split cap into its own branch)
+        ▼
+if ratio < 2.7:            penalty = 0
+elif dScaled >= D_CAP:      penalty = MAX_PENALTY_PERCENT * PENALTY_UNIT
+else:                       penalty = dScaled² * MAX_PENALTY_PERCENT * PENALTY_UNIT / D_CAP²
+```
+
+This is the exact formula implemented in `getDynamicFee()`.
