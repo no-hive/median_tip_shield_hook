@@ -11,29 +11,18 @@
     "tabs": [
       {
         "tab": "Get Started",
-        "groups": [
-          {
-            "group": "Overview",
-            "pages": [
-              "introduction",
-              "concept",
-              "architecture",
-              "logic",
-              "dynamic-fee-penalty-math"
-            ]
-          }
+        "pages": [
+          "introduction",
+          "concept",
+          "architecture",
+          "dynamic-fee-penalty-math"
         ]
       },
       {
         "tab": "Guides",
-        "groups": [
-          {
-            "group": "Deployment",
-            "pages": [
-              "guides/deploy-pool",
-              "guides/deploy-hook"
-            ]
-          }
+        "pages": [
+          "guides/deploy-pool",
+          "guides/deploy-hook"
         ]
       }
     ]
