@@ -105,7 +105,7 @@ contract MedianPriorityFeeHook is BaseHook {
     // Mapping of nice and sound token addresses.
     // Only initialized in the constructor.
     // Chain-specific.
-    mapping(address => bool) public immutable isListed;
+    mapping(address => bool) public isListed;
 
     // -----------------------------------------------
     // CONSTRUCTOR
