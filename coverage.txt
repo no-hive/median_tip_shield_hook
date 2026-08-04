@@ -1,5 +1,5 @@
 Compiling 93 files with Solc 0.8.30
-Solc 0.8.30 finished in 1.12s
+Solc 0.8.30 finished in 1.18s
 Compiler run successful with warnings:
 Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
   --> src/lib/FrugalMedianLibrary.sol:53:28:
@@ -8,9 +8,9 @@ Warning (5667): Unused function parameter. Remove or comment out the variable na
    |                            ^^^^^^^^^^^
 
 Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
-   --> src/MPFHook.sol:115:35:
+   --> src/MPFHook.sol:163:35:
     |
-115 |     function _beforeSwap(address, PoolKey calldata key, SwapParams calldata, bytes calldata)
+163 |     function _beforeSwap(address, PoolKey calldata key, SwapParams calldata, bytes calldata)
     |                                   ^^^^^^^^^^^^^^^^^^^^
 
 Warning (2018): Function state mutability can be restricted to view
@@ -29,14 +29,14 @@ Ran 6 tests for test/utils/libraries/EasyPosm.t.sol:EasyPosmTest
 [PASS] test_increaseLiquidityNative() (gas: 471914)
 [PASS] test_mintLiquidity() (gas: 443626)
 [PASS] test_mintLiquidityNative() (gas: 392737)
-Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 8.93ms (10.58ms CPU time)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 9.88ms (14.64ms CPU time)
 
 Ran 2 tests for test/MPFHook.t.sol:MPFHookTest
 [PASS] testFirstSwap() (gas: 150788)
 [PASS] testSwapWithHighPriorityFee() (gas: 699302)
-Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 10.97ms (5.71ms CPU time)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 12.33ms (6.46ms CPU time)
 
-Ran 2 test suites in 11.53ms (19.91ms CPU time): 8 tests passed, 0 failed, 0 skipped (8 total tests)
+Ran 2 test suites in 12.90ms (22.22ms CPU time): 8 tests passed, 0 failed, 0 skipped (8 total tests)
 
 ╭-------------------------------------------+------------------+------------------+----------------+----------------╮
 | File                                      | % Lines          | % Statements     | % Branches     | % Funcs        |
