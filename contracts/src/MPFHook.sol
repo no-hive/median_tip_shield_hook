@@ -19,10 +19,81 @@ import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 //  CONTRACT
 // -----------------------------------------------
 
+// Uniswap v4 hook that tracks a running (approximate) median of the priority
+// fee paid by swappers and penalizes swaps whose priority fee is
+// significantly above that median. The idea is to discourage aggressive
+// priority-fee bidding (e.g. sandwich/MEV-style behavior) by making
+// "overpaying" swaps pay a higher dynamic LP fee.
 contract MedianPriorityFeeHook is BaseHook {
     using PoolIdLibrary for PoolKey;
     using LPFeeLibrary for uint24;
     using SafeCast for uint256;
+
+    // -----------------------------------------------
+    // ERRORS
+    // -----------------------------------------------
+
+    // Thrown in _afterInitialize when a pool is created without the
+    // dynamic-fee flag set. Without dynamic fees enabled, this hook's
+    // whole fee-adjustment logic would have no effect on the pool, so we
+    // reject such pools outright instead of silently doing nothing.
+    error NotDynamicFee();
+
+    // -----------------------------------------------
+    // EVENTS
+    // -----------------------------------------------
+
+    // (none yet)
+
+    // -----------------------------------------------
+    // CONSTANTS / IMMUTABLE VARIABLES
+    // -----------------------------------------------
+
+    // Fixed-point precision used for all ratio math below (3 decimal
+    // places, e.g. a ratio of 1.000 is stored internally as 1000).
+    uint256 public immutable PRECISION = 1000;
+
+    // Ratio (priorityFee / medianPriorityFee) above which the penalty
+    // starts to kick in, expressed in PRECISION units.
+    // 2700 / 1000 = 2.7x the current approximate median.
+    uint256 public immutable RATIO_THRESHOLD = 2700;
+
+    // Once the "excess ratio" (see getDynamicFee) reaches this value the
+    // penalty is already saturated at MAX_PENALTY_PERCENT, so anything
+    // beyond this point is clamped instead of computed.
+    // 7 * PRECISION = an excess of 7.0 ratio units above RATIO_THRESHOLD.
+    uint256 public immutable D_CAP = 7 * PRECISION;
+
+    // Baseline LP fee applied to every swap before any penalty is added,
+    // expressed in ppm (parts-per-million), where 1_000_000 = 100%.
+    // 1000 ppm = 0.1%.
+    uint24 public immutable BASIC_FEE = 1000;
+
+    // Upper bound on how large the penalty portion of the fee can ever
+    // get, expressed as a plain percentage (e.g. 50 = 50%). This caps the
+    // total fee so a single swap is never charged more than this share of
+    // its notional amount as a penalty.
+    uint256 public immutable MAX_PENALTY_PERCENT = 50;
+
+    // Conversion factor from "percent" to the ppm fee units used
+    // internally: 1% == 10_000 ppm (since 1_000_000 ppm == 100%).
+    uint256 public immutable PENALTY_UNIT = 10000;
+
+    // -----------------------------------------------
+    // STORAGE VARIABLES
+    // -----------------------------------------------
+
+    // Running state for the approximate-median estimator (see
+    // FrugalMedianLibrary). NOTE: this state is shared across all pools
+    // that use this hook instance — there is a single global median, not
+    // one per pool.
+    struct MedianState {
+        int256 approxMedian; // current estimate of the median priority fee
+        int256 step;         // current step size used by the frugal-median update rule
+        bool positive;       // direction of the last adjustment (increase vs decrease)
+    }
+
+    MedianState public medianState;
 
     // -----------------------------------------------
     // CONSTRUCTOR
@@ -31,13 +102,19 @@ contract MedianPriorityFeeHook is BaseHook {
     constructor(IPoolManager _poolManager) BaseHook(_poolManager) {}
 
     // -----------------------------------------------
-    // HOOK PERMISSIONS
+    // EXTERNAL / PUBLIC FUNCTIONS
     // -----------------------------------------------
 
+    // Declares which Uniswap v4 hook callbacks this contract implements.
+    // We only need:
+    //  - afterInitialize: to verify the newly created pool actually uses
+    //    dynamic fees (otherwise our fee logic would never be applied).
+    //  - beforeSwap: to compute and apply the penalized dynamic fee for
+    //    every swap, and to update the running median estimate.
     function getHookPermissions() public pure override returns (Hooks.Permissions memory) {
         return Hooks.Permissions({
             beforeInitialize: false,
-            afterInitialize: true, // used to check pool has dymanic fees
+            afterInitialize: true, // used to check pool has dynamic fees
             beforeAddLiquidity: false,
             afterAddLiquidity: false,
             beforeRemoveLiquidity: false,
@@ -54,51 +131,14 @@ contract MedianPriorityFeeHook is BaseHook {
     }
 
     // -----------------------------------------------
-    // ERRORS
+    // INTERNAL / OVERRIDE FUNCTIONS
     // -----------------------------------------------
 
-    // used in _afterInitialize to singal new pool has no dynamic fee.
-    error NotDynamicFee();
-
-    // -----------------------------------------------
-    // EVENTS
-    // -----------------------------------------------
-
-    // -----------------------------------------------
-    // IMMUNTALE VARIABLES
-    // -----------------------------------------------
-
-    // ratio precision (3 decimal places)
-    uint256 public immutable PRECISION = 1000;
-    // 2.7 * PRECISION
-    uint256 public immutable RATIO_THRESHOLD = 2700;
-    // with d >= 7, penalty is already at max (see below)
-    uint256 public immutable D_CAP = 7 * PRECISION;
-    // 0.1% in ppm (1_000_000 = 100%)
-    uint24 public immutable BASIC_FEE = 1000;
-    // max penality is created to keep punishment up to 50% of the swap amount
-    uint256 public immutable MAX_PENALTY_PERCENT = 50;
-    // 1% => 10_000 in fee units
-    uint256 public immutable PENALTY_UNIT = 10000;
-
-    // -----------------------------------------------
-    // MUTABLE VARIABLES
-    // -----------------------------------------------
-
-    // struct that stores data on Median - one struct for all pools btw.
-    struct MedianState {
-        int256 approxMedian;
-        int256 step;
-        bool positive;
-    }
-
-    MedianState public medianState;
-
-    // -----------------------------------------------
-    // OVERRIDE FUNCTOINS
-    // -----------------------------------------------
-
-    //  If pool has no dynamic fee marker while being created, it means hook's logic will be useless.
+    // Called by the PoolManager right after a pool using this hook is
+    // initialized. If the pool was NOT configured with the dynamic-fee
+    // flag, this hook's fee-adjustment logic can never run, so we revert
+    // to prevent creating a pool where the hook would be silently useless.
+    // Otherwise, we set the pool's initial LP fee to BASIC_FEE.
     function _afterInitialize(address, PoolKey calldata key, uint160, int24)
         internal
         virtual
@@ -110,43 +150,58 @@ contract MedianPriorityFeeHook is BaseHook {
         return this.afterInitialize.selector;
     }
 
-    // the function to ve used every swap to detect those who overuse priority fee and
-    // change fees to punish them accordingly.
+    // Called by the PoolManager before every swap on a pool using this
+    // hook. This is where the penalty logic is actually enforced:
+    //   1. Read how much priority fee the current transaction is paying.
+    //   2. Compute the dynamic LP fee for this swap based on how far its
+    //      priority fee is above the running median (see getDynamicFee).
+    //   3. Feed this swap's priority fee into the running median
+    //      estimator so future swaps are compared against an up-to-date
+    //      median.
+    // The computed fee is returned with the OVERRIDE_FEE_FLAG set so the
+    // PoolManager uses it instead of the pool's currently stored LP fee.
     function _beforeSwap(address, PoolKey calldata key, SwapParams calldata, bytes calldata)
         internal
         override
         returns (bytes4, BeforeSwapDelta, uint24)
     {
-        // 1. get tx_priority_fee
-        uint256 priorityFee_ = getPriorityFee();
-        // 2. dynamic fee punishment;
-        uint24 fee_ = getDynamicFee(priorityFee_);
-        // 3. update median_prority_fee
-        UpdateMedian(priorityFee_);
+        // 1. Read this transaction's EIP-1559 priority fee.
+        uint256 currentPriorityFee = getPriorityFee();
+        // 2. Compute the penalized dynamic fee for this swap.
+        uint24 dynamicFee = getDynamicFee(currentPriorityFee);
+        // 3. Feed this swap's priority fee into the running median estimate.
+        updateMedian(currentPriorityFee);
 
-        return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee_ | LPFeeLibrary.OVERRIDE_FEE_FLAG);
-    }
-
-    // -----------------------------------------------
-    //  ADDITIONAL FUNCTIONS
-    // -----------------------------------------------
-
-    // this function is important to keep the Median up to date after each swap. Uses
-    // FrugalMedianLIbrary for Math. Just passes all the data and update what library tells to update.
-    function UpdateMedian(uint256 _priorityFee) internal {
-        (int256 newMedian, int256 newStep, bool newPositive) = FrugalMedianLibrary.updateApproxMedian(
-            int256(_priorityFee), medianState.approxMedian, medianState.step, medianState.positive
+        return (
+            BaseHook.beforeSwap.selector,
+            BeforeSwapDeltaLibrary.ZERO_DELTA,
+            dynamicFee | LPFeeLibrary.OVERRIDE_FEE_FLAG
         );
-        medianState.approxMedian = newMedian;
-        medianState.step = newStep;
-        medianState.positive = newPositive;
     }
 
-    // will only work in EIP-1559 transactions because priority fee only exists there
-    // so in all other cases just pass zero priority fee value.
+    // Updates the running approximate median (medianState) with the
+    // priority fee observed in the current swap. Delegates the actual
+    // math to FrugalMedianLibrary and just persists whatever it returns.
+    // This must run on every swap so the median stays representative of
+    // recent priority-fee activity.
+    function updateMedian(uint256 _currentPriorityFee) internal {
+        (int256 updatedMedian, int256 updatedStep, bool updatedDirectionIsPositive) = FrugalMedianLibrary
+            .updateApproxMedian(
+                int256(_currentPriorityFee), medianState.approxMedian, medianState.step, medianState.positive
+            );
+        medianState.approxMedian = updatedMedian;
+        medianState.step = updatedStep;
+        medianState.positive = updatedDirectionIsPositive;
+    }
+
+    // Returns the priority fee (tip above the base fee) paid by the
+    // current transaction. This concept only exists for EIP-1559
+    // transactions (tx.gasprice > block.basefee); for legacy transactions
+    // or when tx.gasprice does not exceed the base fee, we treat the
+    // priority fee as zero rather than reverting or underflowing.
     function getPriorityFee() internal view returns (uint256) {
         uint256 priorityFee;
-        // Calculate priority fee
+        // Priority fee = what the sender actually paid above the base fee.
         if (tx.gasprice <= block.basefee) {
             priorityFee = 0;
         } else {
@@ -155,31 +210,58 @@ contract MedianPriorityFeeHook is BaseHook {
         return priorityFee;
     }
 
-    // the Math for dynamic fee punishment
+    // Computes the dynamic LP fee to charge for a swap, given its
+    // priority fee, by comparing it against the current approximate
+    // median priority fee:
+    //   - If the pool has no median data yet (medianPriorityFee == 0),
+    //     just charge the baseline fee.
+    //   - Otherwise compute the ratio of this swap's priority fee to the
+    //     median, scaled by PRECISION.
+    //   - If that ratio is below RATIO_THRESHOLD (2.7x the median), no
+    //     penalty is applied.
+    //   - Above the threshold, the penalty grows quadratically with how
+    //     far the ratio exceeds RATIO_THRESHOLD ("excess ratio"), up to
+    //     D_CAP, beyond which the penalty is simply clamped at
+    //     MAX_PENALTY_PERCENT. The quadratic growth means small overages
+    //     are cheap but large overages get punished disproportionately.
+    // The final fee is BASIC_FEE plus this penalty, expressed in ppm.
     function getDynamicFee(uint256 priorityFee) internal virtual returns (uint24) {
-        // Find out ratio
-        // 2. get median_priority_fee
-        uint256 medianPriorityFee_ = uint256(medianState.approxMedian);
-        // Find out scaled ratio
-        if (medianPriorityFee_ == 0) return BASIC_FEE; // check that basic fee is not zero
+        // Current approximate median priority fee across recent swaps.
+        uint256 medianPriorityFee = uint256(medianState.approxMedian);
 
-        uint256 ratioScaled = (priorityFee * PRECISION) / medianPriorityFee_;
+        // No median data yet — fall back to the baseline fee to avoid
+        // dividing by zero.
+        if (medianPriorityFee == 0) return BASIC_FEE;
 
-        uint256 penalty;
-        if (ratioScaled < RATIO_THRESHOLD) {
-            penalty = 0;
+        // How many times (scaled by PRECISION) this swap's priority fee
+        // exceeds the current median. E.g. 2700 means "2.7x the median".
+        uint256 priorityFeeRatioScaled = (priorityFee * PRECISION) / medianPriorityFee;
+
+        uint256 penaltyPpm;
+        if (priorityFeeRatioScaled < RATIO_THRESHOLD) {
+            // Priority fee is within the tolerated range — no penalty.
+            penaltyPpm = 0;
         } else {
-            uint256 dScaled = ratioScaled - RATIO_THRESHOLD; // (ratio - 2.7) * PRECISION
+            // How far above the threshold this swap's ratio is, scaled by
+            // PRECISION (e.g. ratio 3.7 with threshold 2.7 gives an
+            // excess of 1.0 * PRECISION).
+            uint256 excessRatioScaled = priorityFeeRatioScaled - RATIO_THRESHOLD;
 
-            if (dScaled >= D_CAP) {
-                penalty = MAX_PENALTY_PERCENT * PENALTY_UNIT;
+            if (excessRatioScaled >= D_CAP) {
+                // Excess is at or beyond the cap — penalty is fully saturated.
+                penaltyPpm = MAX_PENALTY_PERCENT * PENALTY_UNIT;
             } else {
-                penalty = (dScaled * dScaled * MAX_PENALTY_PERCENT * PENALTY_UNIT) / (D_CAP * D_CAP);
+                // Quadratic scaling: penalty grows with the square of the
+                // excess ratio, normalized so it reaches
+                // MAX_PENALTY_PERCENT exactly when excessRatioScaled == D_CAP.
+                penaltyPpm = (excessRatioScaled * excessRatioScaled * MAX_PENALTY_PERCENT * PENALTY_UNIT)
+                    / (D_CAP * D_CAP);
             }
         }
 
-        uint24 fee_ = BASIC_FEE + penalty.toUint24();
+        // Final fee = baseline fee + penalty, in ppm.
+        uint24 totalFee = BASIC_FEE + penaltyPpm.toUint24();
 
-        return fee_;
+        return totalFee;
     }
 }
