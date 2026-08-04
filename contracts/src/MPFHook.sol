@@ -89,11 +89,23 @@ contract MedianPriorityFeeHook is BaseHook {
     // one per pool.
     struct MedianState {
         int256 approxMedian; // current estimate of the median priority fee
-        int256 step;         // current step size used by the frugal-median update rule
-        bool positive;       // direction of the last adjustment (increase vs decrease)
+        int256 step; // current step size used by the frugal-median update rule
+        bool positive; // direction of the last adjustment (increase vs decrease)
     }
 
     MedianState public medianState;
+
+    // Bool creates a whitelist for pools.
+    // It is needed to update Median only with those pools where
+    // we can definitely know the exact swap amount in USD.
+    // It is needed to get rid of dust swaps aimed at
+    // destroying the Median value.
+    mapping(PoolId => bool) public isRegisteredPool;
+
+    // Mapping of nice and sound token addresses.
+    // Only initialized in the constructor.
+    // Chain-specific.
+    mapping(address => bool) public immutable isListed;
 
     // -----------------------------------------------
     // CONSTRUCTOR
@@ -147,6 +159,14 @@ contract MedianPriorityFeeHook is BaseHook {
     {
         if (!key.fee.isDynamicFee()) revert NotDynamicFee();
         poolManager.updateDynamicLPFee(key, BASIC_FEE);
+
+        // Extra value assignment needed to depict
+        // which pool we should trust and which we should not.
+        PoolId id = key.toId();
+        address token0 = Currency.unwrap(key.currency0);
+        address token1 = Currency.unwrap(key.currency1);
+        isRegisteredPool[id] = isListed[token0] || isListed[token1];
+
         return this.afterInitialize.selector;
     }
 
@@ -172,11 +192,12 @@ contract MedianPriorityFeeHook is BaseHook {
         // 3. Feed this swap's priority fee into the running median estimate.
         updateMedian_(currentPriorityFee);
 
-        return (
-            BaseHook.beforeSwap.selector,
-            BeforeSwapDeltaLibrary.ZERO_DELTA,
-            dynamicFee | LPFeeLibrary.OVERRIDE_FEE_FLAG
-        );
+        return
+            (
+                BaseHook.beforeSwap.selector,
+                BeforeSwapDeltaLibrary.ZERO_DELTA,
+                dynamicFee | LPFeeLibrary.OVERRIDE_FEE_FLAG
+            );
     }
 
     // Updates the running approximate median (medianState) with the
@@ -185,10 +206,9 @@ contract MedianPriorityFeeHook is BaseHook {
     // This must run on every swap so the median stays representative of
     // recent priority-fee activity.
     function updateMedian_(uint256 _currentPriorityFee) internal {
-        (int256 updatedMedian, int256 updatedStep, bool updatedDirectionIsPositive) = FrugalMedianLibrary
-            .updateApproxMedian(
-                int256(_currentPriorityFee), medianState.approxMedian, medianState.step, medianState.positive
-            );
+        (int256 updatedMedian, int256 updatedStep, bool updatedDirectionIsPositive) = FrugalMedianLibrary.updateApproxMedian(
+            int256(_currentPriorityFee), medianState.approxMedian, medianState.step, medianState.positive
+        );
         medianState.approxMedian = updatedMedian;
         medianState.step = updatedStep;
         medianState.positive = updatedDirectionIsPositive;
@@ -254,8 +274,8 @@ contract MedianPriorityFeeHook is BaseHook {
                 // Quadratic scaling: penalty grows with the square of the
                 // excess ratio, normalized so it reaches
                 // MAX_PENALTY_PERCENT exactly when excessRatioScaled == D_CAP.
-                penaltyPpm = (excessRatioScaled * excessRatioScaled * MAX_PENALTY_PERCENT * PENALTY_UNIT)
-                    / (D_CAP * D_CAP);
+                penaltyPpm =
+                    (excessRatioScaled * excessRatioScaled * MAX_PENALTY_PERCENT * PENALTY_UNIT) / (D_CAP * D_CAP);
             }
         }
 
