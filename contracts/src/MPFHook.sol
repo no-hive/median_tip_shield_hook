@@ -46,38 +46,38 @@ contract MedianPriorityFeeHook is BaseHook {
     // (none yet)
 
     // -----------------------------------------------
-    // CONSTANTS / IMMUTABLE VARIABLES
+    // CONSTANTS
     // -----------------------------------------------
 
     // Fixed-point precision used for all ratio math below (3 decimal
     // places, e.g. a ratio of 1.000 is stored internally as 1000).
-    uint256 public immutable PRECISION = 1000;
+    uint256 public constant PRECISION = 1000;
 
     // Ratio (priorityFee / medianPriorityFee) above which the penalty
     // starts to kick in, expressed in PRECISION units.
     // 2700 / 1000 = 2.7x the current approximate median.
-    uint256 public immutable RATIO_THRESHOLD = 2700;
+    uint256 public constant RATIO_THRESHOLD = 2700;
 
     // Once the "excess ratio" (see getDynamicFee) reaches this value the
     // penalty is already saturated at MAX_PENALTY_PERCENT, so anything
     // beyond this point is clamped instead of computed.
     // 7 * PRECISION = an excess of 7.0 ratio units above RATIO_THRESHOLD.
-    uint256 public immutable D_CAP = 7 * PRECISION;
+    uint256 public constant D_CAP = 7 * PRECISION;
 
     // Baseline LP fee applied to every swap before any penalty is added,
     // expressed in ppm (parts-per-million), where 1_000_000 = 100%.
     // 1000 ppm = 0.1%.
-    uint24 public immutable BASIC_FEE = 1000;
+    uint24 public constant BASIC_FEE = 1000;
 
     // Upper bound on how large the penalty portion of the fee can ever
     // get, expressed as a plain percentage (e.g. 50 = 50%). This caps the
     // total fee so a single swap is never charged more than this share of
     // its notional amount as a penalty.
-    uint256 public immutable MAX_PENALTY_PERCENT = 50;
+    uint256 public constant MAX_PENALTY_PERCENT = 50;
 
     // Conversion factor from "percent" to the ppm fee units used
     // internally: 1% == 10_000 ppm (since 1_000_000 ppm == 100%).
-    uint256 public immutable PENALTY_UNIT = 10000;
+    uint256 public constant PENALTY_UNIT = 10000;
 
     // -----------------------------------------------
     // STORAGE VARIABLES
