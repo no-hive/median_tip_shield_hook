@@ -166,11 +166,11 @@ contract MedianPriorityFeeHook is BaseHook {
         returns (bytes4, BeforeSwapDelta, uint24)
     {
         // 1. Read this transaction's EIP-1559 priority fee.
-        uint256 currentPriorityFee = getPriorityFee();
+        uint256 currentPriorityFee = getPriorityFee_();
         // 2. Compute the penalized dynamic fee for this swap.
-        uint24 dynamicFee = getDynamicFee(currentPriorityFee);
+        uint24 dynamicFee = getDynamicFee_(currentPriorityFee);
         // 3. Feed this swap's priority fee into the running median estimate.
-        updateMedian(currentPriorityFee);
+        updateMedian_(currentPriorityFee);
 
         return (
             BaseHook.beforeSwap.selector,
@@ -184,7 +184,7 @@ contract MedianPriorityFeeHook is BaseHook {
     // math to FrugalMedianLibrary and just persists whatever it returns.
     // This must run on every swap so the median stays representative of
     // recent priority-fee activity.
-    function updateMedian(uint256 _currentPriorityFee) internal {
+    function updateMedian_(uint256 _currentPriorityFee) internal {
         (int256 updatedMedian, int256 updatedStep, bool updatedDirectionIsPositive) = FrugalMedianLibrary
             .updateApproxMedian(
                 int256(_currentPriorityFee), medianState.approxMedian, medianState.step, medianState.positive
@@ -199,7 +199,7 @@ contract MedianPriorityFeeHook is BaseHook {
     // transactions (tx.gasprice > block.basefee); for legacy transactions
     // or when tx.gasprice does not exceed the base fee, we treat the
     // priority fee as zero rather than reverting or underflowing.
-    function getPriorityFee() internal view returns (uint256) {
+    function getPriorityFee_() internal view returns (uint256) {
         uint256 priorityFee;
         // Priority fee = what the sender actually paid above the base fee.
         if (tx.gasprice <= block.basefee) {
@@ -225,7 +225,7 @@ contract MedianPriorityFeeHook is BaseHook {
     //     MAX_PENALTY_PERCENT. The quadratic growth means small overages
     //     are cheap but large overages get punished disproportionately.
     // The final fee is BASIC_FEE plus this penalty, expressed in ppm.
-    function getDynamicFee(uint256 priorityFee) internal virtual returns (uint24) {
+    function getDynamicFee_(uint256 priorityFee) internal virtual returns (uint24) {
         // Current approximate median priority fee across recent swaps.
         uint256 medianPriorityFee = uint256(medianState.approxMedian);
 
