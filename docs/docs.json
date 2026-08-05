@@ -23,15 +23,6 @@
             ]
           },
           {
-            "group": "Hook Features",
-            "icon": "sparkles",
-            "pages": [
-              "features/fee-mathematics",
-              "features/priority-fee-median-oracle",
-              "features/whitelisted-tokens"
-            ]
-          },
-          {
             "group": "Hook Math",
             "icon": "sigma",
             "pages": [
@@ -41,17 +32,14 @@
               "math/penalty-curve",
               "math/penalty-curve-comparison"
             ]
-          }
-        ]
-      },
-      {
-        "tab": "Dev Guides",
-        "groups": [
+          },
           {
-            "group": "Guides",
-            "icon": "book",
+            "group": "Dev Guides",
+            "icon": "code",
             "pages": [
-              "guides/overview"
+              "guides/overview",
+              "guides/new-page-1",
+              "guides/new-page-2"
             ]
           },
           {
