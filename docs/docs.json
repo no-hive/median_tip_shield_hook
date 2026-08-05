@@ -65,7 +65,8 @@
             "icon": "plus",
             "pages": [
               "extra/contribute",
-              "extra/changelog"
+              "extra/changelog",
+              "extra/test"
             ]
           }
         ]
