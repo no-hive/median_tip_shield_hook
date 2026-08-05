@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/schema.json",
   "theme": "willow",
-  "name": "PFPulse Hook",
+  "name": "Priority Fee Pulse Hook",
   "colors": {
     "primary": "#FF00F6",
     "light": "#FF7BFB",
