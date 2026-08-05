@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "theme": "maple",
+  "theme": "linden",
   "name": "PFPulse Hook",
   "colors": {
     "primary": "#FF007A",
@@ -75,5 +75,16 @@
   },
   "icons": {
     "library": "lucide"
+  },
+  "navbar": {
+    "links": [
+      {
+        "href": "https://github.com/no-hive/priority_fee_pulse_hook",
+        "label": "Github"
+      }
+    ]
+  },
+  "metadata": {
+    "timestamp": true
   }
 }
