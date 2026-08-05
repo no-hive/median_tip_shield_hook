@@ -3,9 +3,9 @@
   "theme": "willow",
   "name": "PFPulse Hook",
   "colors": {
-    "primary": "#FF007A",
-    "light": "#FF4DA6",
-    "dark": "#D6006A"
+    "primary": "#FF00F6",
+    "light": "#FF7BFB",
+    "dark": "#77125A"
   },
   "navigation": {
     "tabs": [
@@ -86,5 +86,10 @@
   },
   "metadata": {
     "timestamp": true
+  },
+  "background": {
+    "color": {
+      "dark": "#141416"
+    }
   }
 }
