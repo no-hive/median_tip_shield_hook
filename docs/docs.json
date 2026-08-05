@@ -24,7 +24,7 @@
           },
           {
             "group": "Hook Math",
-            "icon": "sigma",
+            "icon": "math-function",
             "pages": [
               "math/overview",
               "math/frugal2u-median",
