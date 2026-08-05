@@ -38,7 +38,7 @@ At the same time, the mechanism adapts to network-wide demand. If priority fees 
 
 **Pulse Hook is a short name of Priority Fee Pulse Hook - the mechanism to listen to the pulse of the chain, creating a defense layer against MEV bots.**
 
-# Features of Pulse Hook
+# Hook Features
 
 <Card title="Median Oracle" color="#FF00F6" icon="chart-bar" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/68a090cc-2de5-4cbe-aa6c-68aa84188c4e">
   A shared, on-chain pulse of priority-fee activity that stays calibrated even for thin pools.
@@ -56,13 +56,13 @@ At the same time, the mechanism adapts to network-wide demand. If priority fees 
 
 <Columns cols={2}>
   <Column>
-    <Card title="Sound Tokens Whitelist" color="#FF00F6" icon="list" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/b701701b-00fc-4377-af8f-7007c0f3ff0d">
-      Hook updates Median only from pools that has at least one token from curated list.
+    <Card title="Initialize Pool" color="#FF00F6" icon="circle-dot" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/b701701b-00fc-4377-af8f-7007c0f3ff0d">
+      Check the networks where the hook is already deployed and initialize pools with Pulse Hook connected.
     </Card>
   </Column>
   <Column>
-    <Card title="Sound Tokens Whitelist" color="#FF00F6" icon="list" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/b701701b-00fc-4377-af8f-7007c0f3ff0d">
-      Hook updates Median only from pools that has at least one token from curated list.
+    <Card title="Deploy Hook" color="#FF00F6" icon="bolt" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/b701701b-00fc-4377-af8f-7007c0f3ff0d">
+      You can copy this hook, modify it and deploy wherever your want. This hook is MIT-licensed.
     </Card>
   </Column>
 </Columns>
