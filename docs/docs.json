@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/schema.json",
   "theme": "maple",
-  "name": "MPF Hook",
+  "name": "PFPulse Hook",
   "colors": {
     "primary": "#FF007A",
     "light": "#FF4DA6",
@@ -10,19 +10,64 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Get Started",
-        "pages": [
-          "introduction",
-          "concept",
-          "architecture",
-          "dynamic-fee-penalty-math"
+        "tab": "Docs",
+        "groups": [
+          {
+            "group": "Overview",
+            "icon": "compass",
+            "pages": [
+              "introduction",
+              "overview/e2e-flow"
+            ]
+          },
+          {
+            "group": "Hook Features",
+            "icon": "sparkles",
+            "pages": [
+              "features/fee-mathematics",
+              "features/priority-fee-median-oracle",
+              "features/whitelisted-tokens"
+            ]
+          },
+          {
+            "group": "Hook Math",
+            "icon": "sigma",
+            "pages": [
+              "math/overview",
+              "math/frugal2u-median",
+              "math/median-comparison",
+              "math/penalty-curve",
+              "math/penalty-curve-comparison"
+            ]
+          },
+          {
+            "group": "Project Outlook",
+            "icon": "telescope",
+            "pages": [
+              "outlook/known-limitations",
+              "outlook/future-development"
+            ]
+          }
         ]
       },
       {
-        "tab": "Guides",
-        "pages": [
-          "guides/deploy-pool",
-          "guides/deploy-hook"
+        "tab": "Dev Guides",
+        "groups": [
+          {
+            "group": "Guides",
+            "icon": "book",
+            "pages": [
+              "guides/overview"
+            ]
+          },
+          {
+            "group": "Extra",
+            "icon": "plus",
+            "pages": [
+              "extra/contribute",
+              "extra/changelog"
+            ]
+          }
         ]
       }
     ]

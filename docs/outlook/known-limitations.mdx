@@ -1,0 +1,17 @@
+---
+title: "Known Limitations"
+description: "Current boundaries of PFPHook"
+icon: "triangle-alert"
+---
+
+## Malicious Deployments
+
+A Hook deployment can present tokens as legitimate or safe while using low-quality or malicious tokens controlled by the Hook deployers or related parties. The presence of a PFPHook deployment, whitelisted-token configuration, or MEV-protection mechanism must not be interpreted as an endorsement of the tokens, their issuers, or the deployment operator.
+
+Users and integrators should independently assess token contracts, ownership and administrative permissions, pool configuration, and the identity and reputation of the deploying party before interacting with a pool.
+
+## Off-Chain MEV Coordination
+
+PFPHook cannot prevent MEV actors from coordinating with entities responsible for transaction inclusion or ordering. For example, an MEV actor may reach an off-chain agreement with a party that controls access to the transaction queue.
+
+This type of coordination occurs outside the Hook's on-chain execution environment and cannot be fully solved by on-chain logic alone.

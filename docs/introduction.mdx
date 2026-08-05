@@ -1,59 +1,26 @@
 ---
-title: "Introduction"
-description: "Median Tip Shield Hook for Uniswap v4"
+title: "What is PFPHook"
+description: "PFPulse Hook = Priority Fee Pulse Hook"
 icon: "book-open"
+sidebarTitle: "What is PFPHook"
 ---
 
-## Overview
+PFPHook is a Uniswap Hook project. This page introduces the core concept and serves as the entry point to the documentation.
 
-**MPF Hook** is a Uniswap v4 hook that shields liquidity providers from MEV extraction. Instead of watching prices or trade sizes, it watches how aggressively users bid on priority fees, and charges an adaptive swap fee whenever a transaction looks like front-running.
+> **PFPulse Hook = Priority Fee Pulse Hook.**
 
-Collected fees are redistributed to LPs, turning MEV pressure into compensation.
-
-## Why MPF Hook
+## Why PFPHook
 
 <CardGroup cols={3}>
-  <Card title="Median Oracle" color="#e10196" icon="activity">
+  <Card title="Median Oracle" color="#FF007A" icon="activity">
     A shared, on-chain pulse of priority-fee activity that stays calibrated even for thin pools.
   </Card>
 
-  <Card title="Dynamic Fees" color="#e10196" icon="bug-off">
+  <Card title="Dynamic Fees" color="#FF007A" icon="bug-off">
     Adaptive swap fees that make MEV bots pay for the block space they try to steal.
   </Card>
 
-  <Card title="On-chain Only" color="#e10196" icon="bow-arrow">
-    No off-chain oracles, no trusted operators. All logic lives inside the hook.
+  <Card title="On-Chain Only" color="#FF007A" icon="bow-arrow">
+    No off-chain oracles and no trusted operators. All logic lives inside the Hook.
   </Card>
 </CardGroup>
-
-## Learn
-
-<CardGroup cols={2}>
-  <Card title="Concept" icon="lightbulb" href="/concept">
-    Why priority fees are the right signal, and how the shared oracle works.
-  </Card>
-
-  <Card title="Architecture" icon="layers" href="/architecture">
-    The transaction flow, contract internals, and penalty formula.
-  </Card>
-
-  <Card title="Dynamic Fee Penalty: Math Derivation" icon="calculator" href="/dynamic-fee-penalty-math">
-    How the quadratic penalty formula is derived and turned into fixed-point Solidity.
-  </Card>
-</CardGroup>
-
-## Get started
-
-<CardGroup cols={2}>
-  <Card title="Deploy pool" icon="droplet" href="/guides/deploy-pool">
-    Spin up a Uniswap v4 pool wired to MPF Hook.
-  </Card>
-
-  <Card title="Deploy hook" icon="shield" href="/guides/deploy-hook">
-    Deploy your own instance of the hook contract.
-  </Card>
-</CardGroup>
-
-## Open source
-
-Fully auditable at [no-hive/median\_tip\_shield\_hook](https://github.com/no-hive/median_tip_shield_hook).
