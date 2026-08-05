@@ -7,4 +7,4 @@
 ![Testnet](https://img.shields.io/badge/testnet-untested-red?style=flat)
 ![Mainnet](https://img.shields.io/badge/mainnet-untested-red?style=flat)
 
-## Median Tip Shield Hook
+## Priority Fee Pulse Hook
