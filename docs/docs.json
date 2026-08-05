@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "theme": "linden",
+  "theme": "willow",
   "name": "PFPulse Hook",
   "colors": {
     "primary": "#FF007A",
