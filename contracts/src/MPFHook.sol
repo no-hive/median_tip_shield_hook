@@ -9,11 +9,12 @@ import {BaseHook} from "@openzeppelin/uniswap-hooks/src/base/BaseHook.sol";
 import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
 import {IPoolManager, SwapParams} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
-import {PoolIdLibrary} from "@uniswap/v4-core/src/types/PoolId.sol";
+import {PoolId, PoolIdLibrary} from "@uniswap/v4-core/src/types/PoolId.sol";
 import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "@uniswap/v4-core/src/types/BeforeSwapDelta.sol";
 import {LPFeeLibrary} from "@uniswap/v4-core/src/libraries/LPFeeLibrary.sol";
 import {FrugalMedianLibrary} from "./lib/FrugalMedianLibrary.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 
 // -----------------------------------------------
 //  CONTRACT
@@ -190,7 +191,10 @@ contract MedianPriorityFeeHook is BaseHook {
         // 2. Compute the penalized dynamic fee for this swap.
         uint24 dynamicFee = getDynamicFee_(currentPriorityFee);
         // 3. Feed this swap's priority fee into the running median estimate.
-        updateMedian_(currentPriorityFee);
+        PoolId id = key.toId();
+        if (isRegisteredPool[id]) {
+            updateMedian_(currentPriorityFee);
+        }
 
         return
             (
