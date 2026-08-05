@@ -5,28 +5,40 @@ icon: "book-open"
 sidebarTitle: "What is PFPHook"
 ---
 
-PFPHook is a Uniswap Hook project. This page introduces the core concept and serves as the entry point to the documentation. **PFPulse Hook = Priority Fee Pulse Hook.**
-
 <Frame>
   <img
-    src="/images/Frame-45(1).png"
     alt="Frame 1"
     title="Frame 1"
     lightAlt="Frame 1"
     darkAlt="Frame 2"
+    src="/images/Frame-45(1).png"
     className="dark:hidden"
   />
   <img
-    src="/images/Frame-45(2).png"
     alt="Frame 1"
     title="Frame 1"
     lightAlt="Frame 1"
     darkAlt="Frame 2"
+    src="/images/Frame-45(2).png"
     className="hidden dark:block"
   />
 </Frame>
 
-## Why does this hook make sense
+## The challenge
+
+Liquidity pools—especially low-liquidity pools on launchpads and pools for creator coins—are highly exposed to MEV, including sandwich attacks. These strategies front-run regular users’ transactions to extract profit, often at the expense of traders and liquidity providers.
+
+The challenge is to mitigate this behavior with a solution that remains gas-efficient, fully on-chain, and independent of external infrastructure. It should not require additional nodes, off-chain oracles, or external modules. A standalone Uniswap Hook that can operate on any network where Uniswap is available
+
+## The solution
+
+Pulse Hook maintains a shared median of gas priority fees across all connected pools. When a user’s priority fee significantly exceeds this median, the Hook applies an additional swap fee. As a result, sharp priority-fee spikes become increasingly expensive and can make MEV-driven transactions economically unprofitable.
+
+At the same time, the mechanism adapts to network-wide demand. If priority fees rise broadly—for example, during a bullish market when many users compete for faster execution—the median rises with them. The additional penalty then rapidly decreases, allowing regular users to trade without being penalized for a market-wide increase in fees.
+
+Pulse Hook is a short name of **Priority Fee Pulse Hook - the mechanism to listen to the pulse of the chain, creating a defence layer against MEV bots.**
+
+## Traits of Pulse Hook
 
 <CardGroup cols={3}>
   <Card title="Median Oracle" color="#FF007A" icon="activity">
