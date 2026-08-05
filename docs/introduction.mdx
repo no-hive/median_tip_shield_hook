@@ -19,37 +19,39 @@ sidebarTitle: "What is PFPHook"
     title="Frame 1"
     lightAlt="Frame 1"
     darkAlt="Frame 2"
-    src="/images/Frame-45(2).png"
+    src="/images/Frame-45(3).png"
     className="hidden dark:block"
   />
 </Frame>
 
 ## The challenge
 
-Liquidity pools—especially low-liquidity pools on launchpads and pools for creator coins—are highly exposed to MEV, including sandwich attacks. These strategies front-run regular users’ transactions to extract profit, often at the expense of traders and liquidity providers.
+Liquidity pools - especially low-liquidity pools on launchpads and pools for creator coins - are highly exposed to MEV, including sandwich attacks. These strategies front-run regular users’ transactions to extract profit, often at the expense of traders and liquidity providers.
 
-The challenge is to mitigate this behavior with a solution that remains gas-efficient, fully on-chain, and independent of external infrastructure. It should not require additional nodes, off-chain oracles, or external modules. A standalone Uniswap Hook that can operate on any network where Uniswap is available
+The challenge is to mitigate this behavior with a solution that remains gas-efficient, fully on-chain, and independent of external infrastructure. It should not require additional nodes, off-chain oracles, or external modules. A standalone Smart Contract that can operate on any network where Uniswap v4 is available.
 
 ## The solution
 
 Pulse Hook maintains a shared median of gas priority fees across all connected pools. When a user’s priority fee significantly exceeds this median, the Hook applies an additional swap fee. As a result, sharp priority-fee spikes become increasingly expensive and can make MEV-driven transactions economically unprofitable.
 
-At the same time, the mechanism adapts to network-wide demand. If priority fees rise broadly—for example, during a bullish market when many users compete for faster execution—the median rises with them. The additional penalty then rapidly decreases, allowing regular users to trade without being penalized for a market-wide increase in fees.
+At the same time, the mechanism adapts to network-wide demand. If priority fees rise broadly - for example, during a bullish market when many users compete for faster execution - the median rises with them. The additional penalty then rapidly decreases, allowing regular users to trade without being penalized for a market-wide increase in fees.
 
-**Pulse Hook is a short name of Priority Fee Pulse Hook - the mechanism to listen to the pulse of the chain, creating a defence layer against MEV bots.**
+**Pulse Hook is a short name of Priority Fee Pulse Hook - the mechanism to listen to the pulse of the chain, creating a defense layer against MEV bots.**
 
 ## Traits of Pulse Hook
 
-<CardGroup cols={3}>
-  <Card title="Median Oracle" color="#FF007A" icon="activity">
-    A shared, on-chain pulse of priority-fee activity that stays calibrated even for thin pools.
-  </Card>
+<Card title="Median Oracle ">
+  A shared, on-chain pulse of priority-fee activity that stays calibrated even for thin pools.
+</Card>
 
-  <Card title="Dynamic Fees" color="#FF007A" icon="bug-off">
-    Adaptive swap fees that make MEV bots pay for the block space they try to steal.
-  </Card>
+<Card title="Dynamic Fees">
+  Adaptive swap fees that make MEV bots pay for the block space they try to steal.
+</Card>
 
-  <Card title="On-Chain Only" color="#FF007A" icon="bow-arrow">
-    No off-chain oracles and no trusted operators. All logic lives inside the Hook.
-  </Card>
-</CardGroup>
+<Card title="Sound Tokens Whitelist">
+  Text here
+</Card>
+
+<Card title="Sound Tokens Whitelist" color="#FF00F6" icon="list">
+  Text here
+</Card>
