@@ -191,10 +191,10 @@ contract MedianPriorityFeeHook is BaseHook {
         // 2. Compute the penalized dynamic fee for this swap.
         uint24 dynamicFee = getDynamicFee_(currentPriorityFee);
         // 3. Feed this swap's priority fee into the running median estimate.
-        PoolId id = key.toId();
-        if (isRegisteredPool[id]) {
-            updateMedian_(currentPriorityFee);
-        }
+       PoolId id = key.toId();
+    if (isRegisteredPool[id]) {
+        updateMedian_(currentPriorityFee);
+    }
 
         return
             (
