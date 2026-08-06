@@ -40,18 +40,18 @@ At the same time, the mechanism adapts to network-wide demand. If priority fees 
 
 # Hook Features
 
-<Card title="Internal Oracle" color="#FF00F6" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/68a090cc-2de5-4cbe-aa6c-68aa84188c4e">
+<Card title="Two Levels Internal Oracle:" color="#FF00F6">
 </Card>
 
 <Frame>
   <Columns cols={2}>
     <Column>
-      <Card title="Level-1: Low-cost Median" color="#FF00F6" icon="align-left-2" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/b701701b-00fc-4377-af8f-7007c0f3ff0d">
+      <Card title="#1 - Low-cost Median" color="#FF00F6" icon="align-left-2" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/b701701b-00fc-4377-af8f-7007c0f3ff0d">
         Check the networks where the hook is already deployed and initialize pools with Pulse Hook connected.
       </Card>
     </Column>
     <Column>
-      <Card title="Level-2: 15-blocks TWAP" color="#FF00F6" icon="activity-heartbeat" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/b701701b-00fc-4377-af8f-7007c0f3ff0d">
+      <Card title="#2 - 15-blocks TWAP" color="#FF00F6" icon="activity-heartbeat" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/b701701b-00fc-4377-af8f-7007c0f3ff0d">
         Check the networks where the hook is already deployed and initialize pools with Pulse Hook connected.
       </Card>
     </Column>
@@ -62,9 +62,23 @@ At the same time, the mechanism adapts to network-wide demand. If priority fees 
   Adaptive swap fees that make MEV bots pay for the block space they try to steal.
 </Card>
 
-<Card title="Sound Tokens Whitelist" color="#FF00F6" icon="list" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/b701701b-00fc-4377-af8f-7007c0f3ff0d">
-  Hook updates Median only from pools that has at least one token from curated list.
+<Card title="Two-level Dust Attacks Defense:" color="#FF00F6">
 </Card>
+
+<Frame>
+  <Columns cols={2}>
+    <Column>
+      <Card title="#1 - Sound Tokens Whitelist" color="#FF00F6" icon="access-point" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/b701701b-00fc-4377-af8f-7007c0f3ff0d">
+        Hook updates Median only from pools that has at least one token from curated list.
+      </Card>
+    </Column>
+    <Column>
+      <Card title="#2 - Moving Tick Tracker" color="#FF00F6" icon="acrobatic" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/b701701b-00fc-4377-af8f-7007c0f3ff0d">
+        Check the networks where the hook is already deployed and initialize pools with Pulse Hook connected.
+      </Card>
+    </Column>
+  </Columns>
+</Frame>
 
 # Ready to build?
 
