@@ -23,7 +23,7 @@
             ]
           },
           {
-            "group": "Hook Math",
+            "group": "Math",
             "icon": "calculator",
             "pages": [
               "math/overview",
