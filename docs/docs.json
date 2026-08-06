@@ -17,14 +17,21 @@
             "icon": "compass",
             "pages": [
               "introduction",
-              "overview/e2e-flow",
-              "outlook/known-limitations",
-              "outlook/future-development"
+              "overview/e2e-flow"
+            ]
+          },
+          {
+            "group": "Hook Features",
+            "icon": "sparkles",
+            "pages": [
+              "features/fee-mathematics",
+              "features/priority-fee-median-oracle",
+              "features/whitelisted-tokens"
             ]
           },
           {
             "group": "Hook Math",
-            "icon": "math-function",
+            "icon": "sigma",
             "pages": [
               "math/overview",
               "math/frugal2u-median",
@@ -34,12 +41,23 @@
             ]
           },
           {
-            "group": "Dev Guides",
-            "icon": "code",
+            "group": "Project Outlook",
+            "icon": "telescope",
             "pages": [
-              "guides/overview",
-              "guides/new-page-1",
-              "guides/new-page-2"
+              "outlook/known-limitations",
+              "outlook/future-development"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Dev Guides",
+        "groups": [
+          {
+            "group": "Guides",
+            "icon": "book",
+            "pages": [
+              "guides/overview"
             ]
           },
           {
@@ -47,7 +65,8 @@
             "icon": "plus",
             "pages": [
               "extra/contribute",
-              "extra/changelog"
+              "extra/changelog",
+              "extra/test"
             ]
           }
         ]
