@@ -26,7 +26,7 @@ sidebarTitle: "Introduction"
 
 ## The challenge
 
-Liquidity pools - especially low-liquidity pools on launchpads and pools for creator coins - are highly exposed to MEV, including sandwich attacks. These strategies front-run regular users’ transactions to extract profit, often at the expense of traders and liquidity providers.
+Liquidity pools - _(especially low-liquidity pools on launchpads and pools for creator coins)_ - are highly exposed to MEV, including sandwich attacks. These strategies front-run regular users’ transactions to extract profit, often at the expense of traders and liquidity providers.
 
 The challenge is to mitigate this behavior with a solution that remains gas-efficient, fully on-chain, and independent of external infrastructure. It should not require additional nodes, off-chain oracles, or external modules. A standalone Smart Contract that can operate on any network where Uniswap v4 is available.
 
@@ -34,43 +34,14 @@ The challenge is to mitigate this behavior with a solution that remains gas-effi
 
 Pulse Hook maintains a shared median of gas priority fees across all connected pools. When a user’s priority fee significantly exceeds this median, the Hook applies an additional swap fee. As a result, sharp priority-fee spikes become increasingly expensive and can make MEV-driven transactions economically unprofitable.
 
-At the same time, the mechanism adapts to network-wide demand. If priority fees rise broadly - for example, during a bullish market when many users compete for faster execution - the median rises with them. The additional penalty then rapidly decreases, allowing regular users to trade without being penalized for a market-wide increase in fees.
+At the same time, the mechanism adapts to network-wide demand. If priority fees rise broadly _(for example, during a bullish market when many users compete for faster execution)_ the median rises with them. The additional penalty then rapidly decreases, allowing regular users to trade without being penalized for a market-wide increase in fees.
 
 **Pulse Hook is a short name of Priority Fee Pulse Hook - the mechanism to listen to the pulse of the chain, creating a defense layer against MEV bots.**
 
 # Hook Features
 
-<Card title="The Hook is built around low-cost Median Algorithm:" color="#FF00F6">
-</Card>
-
-<Frame>
-  <Card title="One-for-all-pools Median" color="#FF00F6" icon="coins" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/5095ab3c-c348-49bb-954a-bf20ada2f877">
-    Adaptive swap fees that make MEV bots pay for the block space they try to steal.
-  </Card>
-
-  <Columns cols={2}>
-    <Column>
-      <Card title="#2 - 15-blocks TWAP" color="#FF00F6" icon="activity-heartbeat" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/b701701b-00fc-4377-af8f-7007c0f3ff0d">
-        Check the networks where the hook is already deployed and initialize pools with Pulse Hook connected.
-      </Card>
-    </Column>
-    <Column>
-      <Card title="#1 - Low-cost Median" color="#FF00F6" icon="align-left-2" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/b701701b-00fc-4377-af8f-7007c0f3ff0d">
-        Check the networks where the hook is already deployed and initialize pools with Pulse Hook connected.
-      </Card>
-    </Column>
-  </Columns>
-
-  <Card title="Curated list of Tokens" color="#FF00F6" icon="coins" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/5095ab3c-c348-49bb-954a-bf20ada2f877">
-    Adaptive swap fees that make MEV bots pay for the block space they try to steal.
-  </Card>
-</Frame>
-
 <Card title="Tick" color="#FF00F6" icon="coins" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/5095ab3c-c348-49bb-954a-bf20ada2f877">
   Adaptive swap fees that make MEV bots pay for the block space they try to steal.
-</Card>
-
-<Card title="Two-level Dust Attacks Defense:" color="#FF00F6">
 </Card>
 
 <Frame>
@@ -87,6 +58,10 @@ At the same time, the mechanism adapts to network-wide demand. If priority fees 
     </Column>
   </Columns>
 </Frame>
+
+<Card title="Tick" color="#FF00F6" icon="coins" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/5095ab3c-c348-49bb-954a-bf20ada2f877">
+  Adaptive swap fees that make MEV bots pay for the block space they try to steal.
+</Card>
 
 # Ready to build?
 
