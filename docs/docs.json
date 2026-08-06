@@ -17,7 +17,9 @@
             "icon": "compass",
             "pages": [
               "introduction",
-              "overview/e2e-flow"
+              "overview/e2e-flow",
+              "outlook/known-limitations",
+              "outlook/future-development"
             ]
           },
           {
@@ -38,14 +40,6 @@
               "math/median-comparison",
               "math/penalty-curve",
               "math/penalty-curve-comparison"
-            ]
-          },
-          {
-            "group": "Project Outlook",
-            "icon": "telescope",
-            "pages": [
-              "outlook/known-limitations",
-              "outlook/future-development"
             ]
           }
         ]
