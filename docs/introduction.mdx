@@ -40,27 +40,20 @@ At the same time, the mechanism adapts to network-wide demand. If priority fees 
 
 # Hook Features
 
-<Card title="Tick" color="#FF00F6" icon="coins" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/5095ab3c-c348-49bb-954a-bf20ada2f877">
-  Adaptive swap fees that make MEV bots pay for the block space they try to steal.
+<Card title="Priority Fee Median" color="#FF00F6" icon="coins" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/5095ab3c-c348-49bb-954a-bf20ada2f877">
+  The main low-gas mechanism to keep up with pools activity pulse. Updates quite quickly as it is algorithmic median built using Frugal2U approach.
 </Card>
 
-<Frame>
-  <Columns cols={2}>
-    <Column>
-      <Card title="#1 - Sound Tokens Whitelist" color="#FF00F6" icon="access-point" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/b701701b-00fc-4377-af8f-7007c0f3ff0d">
-        Hook updates Median only from pools that has at least one token from curated list.
-      </Card>
-    </Column>
-    <Column>
-      <Card title="#2 - Moving Tick Tracker" color="#FF00F6" icon="acrobatic" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/b701701b-00fc-4377-af8f-7007c0f3ff0d">
-        Check the networks where the hook is already deployed and initialize pools with Pulse Hook connected.
-      </Card>
-    </Column>
-  </Columns>
-</Frame>
+<Card title="15-blocks Median Snapshots " color="#FF00F6" icon="access-point" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/b701701b-00fc-4377-af8f-7007c0f3ff0d">
+  The extra mechanism to keep Median Oracle effective against MEV attacks. 
+</Card>
 
-<Card title="Tick" color="#FF00F6" icon="coins" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/5095ab3c-c348-49bb-954a-bf20ada2f877">
-  Adaptive swap fees that make MEV bots pay for the block space they try to steal.
+<Card title="Dynamic Fees" color="#FF00F6" icon="acrobatic" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/b701701b-00fc-4377-af8f-7007c0f3ff0d">
+  Keep the fees low for real users and high for MEV bots.
+</Card>
+
+<Card title="Sound Tokens Whitelist" color="#FF00F6" icon="coins" href="https://app.mintlify.com/mpf-hook/pulse-hook/~/5095ab3c-c348-49bb-954a-bf20ada2f877">
+  The mechanism to have chain-specific whitelist of chain core tokens. Median will update its state only from pools with these tokens.
 </Card>
 
 # Ready to build?
