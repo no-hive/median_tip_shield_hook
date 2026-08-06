@@ -14,6 +14,7 @@ import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "@uniswap/v4-core/src/type
 import {LPFeeLibrary} from "@uniswap/v4-core/src/libraries/LPFeeLibrary.sol";
 import {FrugalMedianLibrary} from "./lib/FrugalMedianLibrary.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 
 // -----------------------------------------------
@@ -54,16 +55,22 @@ contract MedianPriorityFeeHook is BaseHook {
     // places, e.g. a ratio of 1.000 is stored internally as 1000).
     uint256 public constant PRECISION = 1000;
 
+    // Fixed-point precision used for the fractional-exponent (frac^1.5)
+    // computation in getDynamicFee_. 1e18 = "1.0" in WAD terms.
+    uint256 public constant WAD = 1e18;
+
     // Ratio (priorityFee / medianPriorityFee) above which the penalty
     // starts to kick in, expressed in PRECISION units.
     // 2700 / 1000 = 2.7x the current approximate median.
     uint256 public constant RATIO_THRESHOLD = 2700;
 
-    // Once the "excess ratio" (see getDynamicFee) reaches this value the
+    // Once the "excess ratio" (see getDynamicFee_) reaches this value the
     // penalty is already saturated at MAX_PENALTY_PERCENT, so anything
     // beyond this point is clamped instead of computed.
-    // 7 * PRECISION = an excess of 7.0 ratio units above RATIO_THRESHOLD.
-    uint256 public constant D_CAP = 7 * PRECISION;
+    // 7.3 * PRECISION = an excess of 7.3 ratio units above RATIO_THRESHOLD,
+    // i.e. the penalty saturates at a priority fee of ~10x the median
+    // (RATIO_THRESHOLD + D_CAP = 10.0x).
+    uint256 public constant D_CAP = 7300;
 
     // Baseline LP fee applied to every swap before any penalty is added,
     // expressed in ppm (parts-per-million), where 1_000_000 = 100%.
@@ -71,10 +78,10 @@ contract MedianPriorityFeeHook is BaseHook {
     uint24 public constant BASIC_FEE = 1000;
 
     // Upper bound on how large the penalty portion of the fee can ever
-    // get, expressed as a plain percentage (e.g. 50 = 50%). This caps the
+    // get, expressed as a plain percentage (e.g. 10 = 10%). This caps the
     // total fee so a single swap is never charged more than this share of
-    // its notional amount as a penalty.
-    uint256 public constant MAX_PENALTY_PERCENT = 50;
+    // its notional amount as a penalty. Reached exactly at a 10x ratio.
+    uint256 public constant MAX_PENALTY_PERCENT = 10;
 
     // Conversion factor from "percent" to the ppm fee units used
     // internally: 1% == 10_000 ppm (since 1_000_000 ppm == 100%).
@@ -175,7 +182,7 @@ contract MedianPriorityFeeHook is BaseHook {
     // hook. This is where the penalty logic is actually enforced:
     //   1. Read how much priority fee the current transaction is paying.
     //   2. Compute the dynamic LP fee for this swap based on how far its
-    //      priority fee is above the running median (see getDynamicFee).
+    //      priority fee is above the running median (see getDynamicFee_).
     //   3. Feed this swap's priority fee into the running median
     //      estimator so future swaps are compared against an up-to-date
     //      median.
@@ -191,10 +198,10 @@ contract MedianPriorityFeeHook is BaseHook {
         // 2. Compute the penalized dynamic fee for this swap.
         uint24 dynamicFee = getDynamicFee_(currentPriorityFee);
         // 3. Feed this swap's priority fee into the running median estimate.
-       PoolId id = key.toId();
-    if (isRegisteredPool[id]) {
-        updateMedian_(currentPriorityFee);
-    }
+        PoolId id = key.toId();
+        if (isRegisteredPool[id]) {
+            updateMedian_(currentPriorityFee);
+        }
 
         return
             (
@@ -243,11 +250,17 @@ contract MedianPriorityFeeHook is BaseHook {
     //     median, scaled by PRECISION.
     //   - If that ratio is below RATIO_THRESHOLD (2.7x the median), no
     //     penalty is applied.
-    //   - Above the threshold, the penalty grows quadratically with how
-    //     far the ratio exceeds RATIO_THRESHOLD ("excess ratio"), up to
-    //     D_CAP, beyond which the penalty is simply clamped at
-    //     MAX_PENALTY_PERCENT. The quadratic growth means small overages
-    //     are cheap but large overages get punished disproportionately.
+    //   - Above the threshold, the penalty grows along a single power-1.5
+    //     curve (frac^1.5, where frac is how far the excess ratio is
+    //     through the 2.7x -> 10.0x range), up to D_CAP, beyond which the
+    //     penalty is simply clamped at MAX_PENALTY_PERCENT. Power-1.5
+    //     growth (steeper than linear, gentler than quadratic at first)
+    //     was chosen so the curve passes close to three calibration
+    //     points at once: ~1-2% around 4-5x, ~3-5% around 7x, and exactly
+    //     10% (the hard cap) at 10x. Using an integer exponent alone
+    //     (e.g. plain quadratic) cannot hit all three points; frac^1.5 is
+    //     computed cheaply on-chain via Math.sqrt (frac^1.5 = frac *
+    //     sqrt(frac)), avoiding a full fixed-point pow/ln/exp library.
     // The final fee is BASIC_FEE plus this penalty, expressed in ppm.
     function getDynamicFee_(uint256 priorityFee) internal virtual returns (uint24) {
         // Current approximate median priority fee across recent swaps.
@@ -271,16 +284,20 @@ contract MedianPriorityFeeHook is BaseHook {
             // excess of 1.0 * PRECISION).
             uint256 excessRatioScaled = priorityFeeRatioScaled - RATIO_THRESHOLD;
 
-            if (excessRatioScaled >= D_CAP) {
-                // Excess is at or beyond the cap — penalty is fully saturated.
-                penaltyPpm = MAX_PENALTY_PERCENT * PENALTY_UNIT;
-            } else {
-                // Quadratic scaling: penalty grows with the square of the
-                // excess ratio, normalized so it reaches
-                // MAX_PENALTY_PERCENT exactly when excessRatioScaled == D_CAP.
-                penaltyPpm =
-                    (excessRatioScaled * excessRatioScaled * MAX_PENALTY_PERCENT * PENALTY_UNIT) / (D_CAP * D_CAP);
-            }
+            // Fraction of the way through the penalty range [0, D_CAP],
+            // expressed in WAD (1e18 = "fully saturated"). Clamped to
+            // WAD instead of computed further once excess reaches D_CAP,
+            // both to save gas and to guarantee no overflow regardless
+            // of how large priorityFeeRatioScaled is.
+            uint256 fracWad = excessRatioScaled >= D_CAP ? WAD : (excessRatioScaled * WAD) / D_CAP;
+
+            // frac^1.5 = frac * sqrt(frac), computed in WAD fixed point.
+            // Math.sqrt(fracWad * WAD) rescales sqrt(x/1e18) back to a
+            // 1e18-scaled result (sqrt(1e36) == 1e18).
+            uint256 sqrtFracWad = Math.sqrt(fracWad * WAD);
+            uint256 frac1_5Wad = (fracWad * sqrtFracWad) / WAD;
+
+            penaltyPpm = (frac1_5Wad * MAX_PENALTY_PERCENT * PENALTY_UNIT) / WAD;
         }
 
         // Final fee = baseline fee + penalty, in ppm.
