@@ -47,7 +47,7 @@ contract MPFHookTest is BaseTest {
         (currency0, currency1) = deployCurrencyPair();
 
         // Deploy the hook to an address with the correct flags
-        address flags = address(uint160(Hooks.AFTER_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG) ^ (0x4444 << 144));
+        address flags = address(uint160(Hooks.AFTER_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG | Hooks.AFTER_SWAP_FLAG) ^ (0x4444 << 144));
         bytes memory constructorArgs = abi.encode(poolManager); // Add all the necessary constructor arguments from the hook
         deployCodeTo("MPFHook.sol:MedianPriorityFeeHook", constructorArgs, flags);
         hook = MedianPriorityFeeHook(flags);

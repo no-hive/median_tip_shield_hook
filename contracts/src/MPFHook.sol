@@ -16,6 +16,7 @@ import {FrugalMedianLibrary} from "./lib/FrugalMedianLibrary.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
+import {BalanceDelta} from "v4-core/src/types/BalanceDelta.sol";
 
 // -----------------------------------------------
 //  CONTRACT
@@ -182,7 +183,7 @@ contract MedianPriorityFeeHook is BaseHook {
             beforeRemoveLiquidity: false,
             afterRemoveLiquidity: false,
             beforeSwap: true, // used for custom fees logic
-            afterSwap: false,
+            afterSwap: true, // used to increase median after swap to het afterswap tick
             beforeDonate: false,
             afterDonate: false,
             beforeSwapReturnDelta: false,
@@ -255,12 +256,6 @@ contract MedianPriorityFeeHook is BaseHook {
 
         // 4. Compute the penalized dynamic fee for this swap.
         uint24 dynamicFee = getDynamicFee_(currentPriorityFee, referenceMedian);
-
-        // 5. Feed this swap's priority fee into the running median estimate.
-        PoolId id = key.toId();
-        if (isRegisteredPool[id]) {
-            updateMedian_(currentPriorityFee);
-        }
 
         return
             (
@@ -400,5 +395,20 @@ contract MedianPriorityFeeHook is BaseHook {
         uint24 totalFee = BASIC_FEE + penaltyPpm.toUint24();
 
         return totalFee;
+    }
+
+    function _afterSwap(address, PoolKey calldata key, SwapParams calldata, BalanceDelta, bytes calldata)
+        internal
+        override
+        returns (bytes4, int128)
+    {
+                // 3. Read this transaction's EIP-1559 priority fee.
+        uint256 currentPriorityFee = getPriorityFee_();
+        // 5. Feed this swap's priority fee into the running median estimate.
+        PoolId id = key.toId();
+        if (isRegisteredPool[id]) {
+            updateMedian_(currentPriorityFee);
+        }
+        return (BaseHook.afterSwap.selector, 0);
     }
 }
