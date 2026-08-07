@@ -162,7 +162,11 @@ contract MedianPriorityFeeHook is BaseHook {
     // CONSTRUCTOR
     // -----------------------------------------------
 
-    constructor(IPoolManager _poolManager) BaseHook(_poolManager) {}
+    constructor(IPoolManager _poolManager, address[] memory _listedTokens) BaseHook(_poolManager) {
+        for (uint256 i = 0; i < _listedTokens.length; i++) {
+            isListed[_listedTokens[i]] = true;
+        }
+    }
 
     // -----------------------------------------------
     // EXTERNAL / PUBLIC FUNCTIONS
@@ -402,7 +406,7 @@ contract MedianPriorityFeeHook is BaseHook {
         override
         returns (bytes4, int128)
     {
-                // 3. Read this transaction's EIP-1559 priority fee.
+        // 3. Read this transaction's EIP-1559 priority fee.
         uint256 currentPriorityFee = getPriorityFee_();
         // 5. Feed this swap's priority fee into the running median estimate.
         PoolId id = key.toId();
