@@ -23,6 +23,16 @@
             ]
           },
           {
+            "group": "Code",
+            "icon": "code",
+            "pages": [
+              "code/contract",
+              "code/tests",
+              "extra/contribute",
+              "extra/changelog"
+            ]
+          },
+          {
             "group": "Math",
             "icon": "calculator",
             "pages": [
@@ -38,14 +48,6 @@
             "icon": "book",
             "pages": [
               "guides/overview"
-            ]
-          },
-          {
-            "group": "Extra",
-            "icon": "plus",
-            "pages": [
-              "extra/contribute",
-              "extra/changelog"
             ]
           }
         ]
