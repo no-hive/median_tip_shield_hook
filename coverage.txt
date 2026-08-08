@@ -1,11 +1,17 @@
 Compiling 94 files with Solc 0.8.30
-Solc 0.8.30 finished in 1.22s
+Solc 0.8.30 finished in 1.25s
 Compiler run successful with warnings:
 Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
    --> src/MPFHook.sol:246:35:
     |
 246 |     function _beforeSwap(address, PoolKey calldata key, SwapParams calldata, bytes calldata)
     |                                   ^^^^^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+  --> script/00_DeployHook.s.sol:18:9:
+   |
+18 |         uint256 tokenCount = deploymentConfig.soundTokens.length;
+   |         ^^^^^^^^^^^^^^^^^^
 
 Warning (2018): Function state mutability can be restricted to view
   --> script/base/BaseScript.sol:70:5:
@@ -29,7 +35,7 @@ Ran 6 tests for test/utils/libraries/EasyPosm.t.sol:EasyPosmTest
 [PASS] test_increaseLiquidityNative() (gas: 471914)
 [PASS] test_mintLiquidity() (gas: 443626)
 [PASS] test_mintLiquidityNative() (gas: 392737)
-Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 220.65ms (13.68ms CPU time)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 182.67ms (15.93ms CPU time)
 
 Ran 5 tests for test/MPFHook.t.sol:MPFHookTest
 [PASS] testFirstSwap() (gas: 228052)
@@ -37,14 +43,14 @@ Ran 5 tests for test/MPFHook.t.sol:MPFHookTest
 [PASS] test_ComplexScenario_LowHighLow() (gas: 26820418)
 [PASS] test_MedianRecoversAfterPressureEnds() (gas: 27753005)
 [PASS] test_SustainedHighFeePressure_MedianShifts() (gas: 14495829)
-Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 220.67ms (576.99ms CPU time)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 197.29ms (531.38ms CPU time)
 
-Ran 2 test suites in 221.35ms (441.33ms CPU time): 11 tests passed, 0 failed, 0 skipped (11 total tests)
+Ran 2 test suites in 197.88ms (379.96ms CPU time): 11 tests passed, 0 failed, 0 skipped (11 total tests)
 
 ╭-------------------------------------------+------------------+------------------+----------------+-----------------╮
 | File                                      | % Lines          | % Statements     | % Branches     | % Funcs         |
 +====================================================================================================================+
-| script/00_DeployHook.s.sol                | 0.00% (0/11)     | 0.00% (0/13)     | 0.00% (0/2)    | 0.00% (0/1)     |
+| script/00_DeployHook.s.sol                | 0.00% (0/13)     | 0.00% (0/16)     | 0.00% (0/2)    | 0.00% (0/1)     |
 |-------------------------------------------+------------------+------------------+----------------+-----------------|
 | script/01_CreatePoolAndAddLiquidity.s.sol | 0.00% (0/18)     | 0.00% (0/25)     | 100.00% (0/0)  | 0.00% (0/1)     |
 |-------------------------------------------+------------------+------------------+----------------+-----------------|
@@ -52,7 +58,7 @@ Ran 2 test suites in 221.35ms (441.33ms CPU time): 11 tests passed, 0 failed, 0 
 |-------------------------------------------+------------------+------------------+----------------+-----------------|
 | script/03_Swap.s.sol                      | 0.00% (0/8)      | 0.00% (0/8)      | 100.00% (0/0)  | 0.00% (0/1)     |
 |-------------------------------------------+------------------+------------------+----------------+-----------------|
-| script/HelperConfig.s.sol                 | 0.00% (0/8)      | 0.00% (0/5)      | 0.00% (0/2)    | 0.00% (0/3)     |
+| script/HelperConfig.s.sol                 | 0.00% (0/38)     | 0.00% (0/37)     | 0.00% (0/6)    | 0.00% (0/5)     |
 |-------------------------------------------+------------------+------------------+----------------+-----------------|
 | script/base/BaseScript.sol                | 0.00% (0/25)     | 0.00% (0/22)     | 0.00% (0/8)    | 0.00% (0/4)     |
 |-------------------------------------------+------------------+------------------+----------------+-----------------|
@@ -70,5 +76,5 @@ Ran 2 test suites in 221.35ms (441.33ms CPU time): 11 tests passed, 0 failed, 0 
 |-------------------------------------------+------------------+------------------+----------------+-----------------|
 | test/utils/libraries/EasyPosm.sol         | 83.02% (44/53)   | 81.82% (54/66)   | 100.00% (0/0)  | 83.33% (5/6)    |
 |-------------------------------------------+------------------+------------------+----------------+-----------------|
-| Total                                     | 56.41% (176/312) | 56.85% (195/343) | 45.24% (19/42) | 60.00% (27/45)  |
+| Total                                     | 51.16% (176/344) | 51.59% (195/378) | 41.30% (19/46) | 57.45% (27/47)  |
 ╰-------------------------------------------+------------------+------------------+----------------+-----------------╯
