@@ -153,7 +153,7 @@ contract MedianPriorityFeeHookForkIntegrationTest is Test {
     // Basic wiring checks
     // ---------------------------------------------------------------
 
-    function _test_poolManagerHasCode() public view {
+    function test_poolManagerHasCode() public view {
         assertGt(address(poolManager).code.length, 0);
     }
 
@@ -186,7 +186,7 @@ contract MedianPriorityFeeHookForkIntegrationTest is Test {
     // fee must be exactly BASIC_FEE no matter how high the priority
     // fee is.
     // ---------------------------------------------------------------
-    function _test_firstSwap_chargesBasicFeeRegardlessOfPriorityFee() public {
+    function test_firstSwap_chargesBasicFeeRegardlessOfPriorityFee() public {
         vm.fee(10 gwei);
         vm.txGasPrice(500 gwei); // huge priority fee, but no reference exists yet
 
@@ -206,7 +206,7 @@ contract MedianPriorityFeeHookForkIntegrationTest is Test {
     // the low-priority-fee swap (higher LP fee eats more of the
     // trade).
     // ---------------------------------------------------------------
-    function _test_highPriorityFee_getsWorseSwapThanLowPriorityFee() public {
+    function test_highPriorityFee_getsWorseSwapThanLowPriorityFee() public {
         _buildUpReferenceMedian();
 
         uint256 snapshot = vm.snapshot();
