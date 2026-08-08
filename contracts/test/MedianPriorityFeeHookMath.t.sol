@@ -29,7 +29,10 @@ contract MedianPriorityFeeHookMathTest is Test {
     uint256 constant RATIO_THRESHOLD = 2700; // 2.7x, PRECISION = 1000
 
     function setUp() public {
-        // Dummy pool manager address is fine here — the harness never
+
+    
+        vm.startBroadcast();
+            // Dummy pool manager address is fine here — the harness never
         // talks to it, we only exercise the pure fee-curve math.
         IPoolManager dummyPoolManager = IPoolManager(address(0xBEEF));
         address[] memory listedTokens = new address[](0);
@@ -46,6 +49,7 @@ contract MedianPriorityFeeHookMathTest is Test {
 
         hook = new MedianPriorityFeeHookHarness{salt: salt}(dummyPoolManager, listedTokens);
         require(address(hook) == hookAddress, "harness address mismatch");
+          vm.stopBroadcast();
     }
 
     function test_noReferenceYet_returnsBasicFee() public {
