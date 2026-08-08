@@ -17,6 +17,7 @@ import {IPositionManager} from "@uniswap/v4-periphery/src/interfaces/IPositionMa
 import {Constants} from "@uniswap/v4-core/test/utils/Constants.sol";
 import {LPFeeLibrary} from "@uniswap/v4-core/src/libraries/LPFeeLibrary.sol";
 import {MockERC20} from "solmate/src/test/utils/mocks/MockERC20.sol";
+import {Vm} from "forge-std/Vm.sol";
 
 import {EasyPosm} from "./utils/libraries/EasyPosm.sol";
 
@@ -236,5 +237,96 @@ contract MPFHookTest is BaseTest {
     // ============================================================
     // TEST 7: CREATE SEVERAL POOLS AND CHECK MULTI-POOL ORACLE WORKS RIGHT
     // ============================================================
+
+    // ============================================================
+// HELPERS
+// ============================================================
+
+// Runs `count` swaps with a small "normal" priority fee to build
+// up a baseline median before the burst / sustained pressure tests.
+function _seedNormalSwaps(uint256 count) internal {
+    uint256 amountIn = 1e18;
+    uint256 baseFee = 10 gwei;
+    uint256 normalPriorityFee = 1 gwei; // small relative to the 50 gwei "attack" fee
+
+    for (uint256 i = 0; i < count; i++) {
+        vm.fee(baseFee);
+        vm.txGasPrice(baseFee + normalPriorityFee);
+
+        swapRouter.swapExactTokensForTokens({
+            amountIn: amountIn,
+            amountOutMin: 0,
+            zeroForOne: true,
+            poolKey: poolKey,
+            hookData: Constants.ZERO_BYTES,
+            receiver: address(this),
+            deadline: block.timestamp + 1
+        });
+    }
+}
+
+// Runs the existing high-priority-fee swap helper, but also captures
+// the actual `fee` value applied by the pool (emitted in the Swap event),
+// so we can directly compare penalties between different points in time.
+function _swapWithHighPriorityFeeAndCaptureFee() internal returns (uint24 appliedFee) {
+    vm.recordLogs();
+    _helpSwapWithHighPriorityFee();
+    Vm.Log[] memory logs = vm.getRecordedLogs();
+
+    // event Swap(PoolId indexed id, address indexed sender, int128 amount0,
+    //            int128 amount1, uint160 sqrtPriceX96, uint128 liquidity,
+    //            int24 tick, uint24 fee);
+    bytes32 swapTopic = keccak256(
+        "Swap(bytes32,address,int128,int128,uint160,uint128,int24,uint24)"
+    );
+
+    for (uint256 i = 0; i < logs.length; i++) {
+        if (logs[i].topics[0] == swapTopic) {
+            (, , , , , appliedFee) =
+                abi.decode(logs[i].data, (int128, int128, uint160, uint128, int24, uint24));
+            return appliedFee;
+        }
+    }
+    revert("Swap event not found in recorded logs");
+}
+
+// ============================================================
+// TEST 3: HIGH-FEE PRESSURE ACROSS MANY BLOCKS
+// ============================================================
+
+function test_SustainedHighFeePressure_MedianShifts_2() public {
+    _seedNormalSwaps(10);
+
+    // важно: продвинуть блок, чтобы снапшот от seed-фазы попал в окно
+    vm.roll(block.number + 1);
+
+    uint24 penaltyBeforePressure = _swapWithHighPriorityFeeAndCaptureFee();
+
+    for (uint256 b = 0; b < 20; b++) {
+        vm.roll(block.number + 1);
+        for (uint256 s = 0; s < 10; s++) {
+            _helpSwapWithHighPriorityFee();
+        }
+    }
+
+    (int256 medianAfterPressure, , ) = hook.medianState();
+
+    vm.roll(block.number + 1);
+    uint24 penaltyAfterPressure = _swapWithHighPriorityFeeAndCaptureFee();
+
+    // 6. Assertions
+    assertLt(
+        penaltyAfterPressure,
+        penaltyBeforePressure,
+        "penalty should drop once the high fee has become the new normal"
+    );
+
+    assertApproxEqAbs(
+        medianAfterPressure,
+        int256(50 gwei),
+        1 gwei,
+        "median should have converged close to the sustained high priority fee"
+    );
+}
 }
 
