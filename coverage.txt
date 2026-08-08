@@ -1,5 +1,5 @@
 Compiling 94 files with Solc 0.8.30
-Solc 0.8.30 finished in 1.15s
+Solc 0.8.30 finished in 1.16s
 Compiler run successful with warnings:
 Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
    --> src/MPFHook.sol:246:35:
@@ -23,16 +23,17 @@ Ran 6 tests for test/utils/libraries/EasyPosm.t.sol:EasyPosmTest
 [PASS] test_increaseLiquidityNative() (gas: 471914)
 [PASS] test_mintLiquidity() (gas: 443626)
 [PASS] test_mintLiquidityNative() (gas: 392737)
-Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 11.62ms (14.15ms CPU time)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 12.29ms (15.51ms CPU time)
 
-Ran 4 tests for test/MPFHook.t.sol:MPFHookTest
+Ran 5 tests for test/MPFHook.t.sol:MPFHookTest
 [PASS] testFirstSwap() (gas: 228052)
-[PASS] testSwapWithHighPriorityFee() (gas: 6160943)
+[PASS] testSwapWithHighPriorityFee() (gas: 6160965)
 [PASS] test_MedianRecoversAfterPressureEnds() (gas: 166)
 [PASS] test_SustainedHighFeePressure_MedianShifts() (gas: 167)
-Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 46.22ms (40.89ms CPU time)
+[PASS] test_SustainedHighFeePressure_MedianShifts_2() (gas: 14495828)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 94.86ms (128.76ms CPU time)
 
-Ran 2 test suites in 46.74ms (57.84ms CPU time): 10 tests passed, 0 failed, 0 skipped (10 total tests)
+Ran 2 test suites in 95.42ms (107.15ms CPU time): 11 tests passed, 0 failed, 0 skipped (11 total tests)
 
 ╭-------------------------------------------+------------------+------------------+----------------+-----------------╮
 | File                                      | % Lines          | % Statements     | % Branches     | % Funcs         |
@@ -53,7 +54,7 @@ Ran 2 test suites in 46.74ms (57.84ms CPU time): 10 tests passed, 0 failed, 0 sk
 |-------------------------------------------+------------------+------------------+----------------+-----------------|
 | script/testing/00_DeployV4.s.sol          | 0.00% (0/9)      | 0.00% (0/8)      | 0.00% (0/2)    | 0.00% (0/1)     |
 |-------------------------------------------+------------------+------------------+----------------+-----------------|
-| src/MPFHook.sol                           | 81.25% (52/64)   | 73.08% (57/78)   | 60.00% (6/10)  | 100.00% (10/10) |
+| src/MPFHook.sol                           | 100.00% (64/64)  | 97.44% (76/78)   | 80.00% (8/10)  | 100.00% (10/10) |
 |-------------------------------------------+------------------+------------------+----------------+-----------------|
 | src/lib/FrugalMedianLibrary.sol           | 48.39% (15/31)   | 52.94% (18/34)   | 28.57% (2/7)   | 66.67% (2/3)    |
 |-------------------------------------------+------------------+------------------+----------------+-----------------|
@@ -63,5 +64,5 @@ Ran 2 test suites in 46.74ms (57.84ms CPU time): 10 tests passed, 0 failed, 0 sk
 |-------------------------------------------+------------------+------------------+----------------+-----------------|
 | test/utils/libraries/EasyPosm.sol         | 83.02% (44/53)   | 81.82% (54/66)   | 100.00% (0/0)  | 83.33% (5/6)    |
 |-------------------------------------------+------------------+------------------+----------------+-----------------|
-| Total                                     | 50.00% (156/312) | 48.69% (167/343) | 30.95% (13/42) | 60.00% (27/45)  |
+| Total                                     | 53.85% (168/312) | 54.23% (186/343) | 35.71% (15/42) | 60.00% (27/45)  |
 ╰-------------------------------------------+------------------+------------------+----------------+-----------------╯
