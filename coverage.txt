@@ -1,5 +1,5 @@
 Compiling 94 files with Solc 0.8.30
-Solc 0.8.30 finished in 1.20s
+Solc 0.8.30 finished in 1.22s
 Compiler run successful with warnings:
 Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
    --> src/MPFHook.sol:246:35:
@@ -22,14 +22,6 @@ Warning (2018): Function state mutability can be restricted to view
 Analysing contracts...
 Running tests...
 
-Ran 5 tests for test/MPFHook.t.sol:MPFHookTest
-[PASS] testFirstSwap() (gas: 228052)
-[PASS] testSwapWithHighPriorityFee() (gas: 6160965)
-[PASS] test_ComplexScenario_LowHighLow() (gas: 26820418)
-[PASS] test_MedianRecoversAfterPressureEnds() (gas: 27753005)
-[PASS] test_SustainedHighFeePressure_MedianShifts() (gas: 14495829)
-Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 197.86ms (529.49ms CPU time)
-
 Ran 6 tests for test/utils/libraries/EasyPosm.t.sol:EasyPosmTest
 [PASS] test_burn() (gas: 400756)
 [PASS] test_decreaseLiquidity() (gas: 500414)
@@ -37,9 +29,17 @@ Ran 6 tests for test/utils/libraries/EasyPosm.t.sol:EasyPosmTest
 [PASS] test_increaseLiquidityNative() (gas: 471914)
 [PASS] test_mintLiquidity() (gas: 443626)
 [PASS] test_mintLiquidityNative() (gas: 392737)
-Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 197.86ms (14.87ms CPU time)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 220.65ms (13.68ms CPU time)
 
-Ran 2 test suites in 198.41ms (395.72ms CPU time): 11 tests passed, 0 failed, 0 skipped (11 total tests)
+Ran 5 tests for test/MPFHook.t.sol:MPFHookTest
+[PASS] testFirstSwap() (gas: 228052)
+[PASS] testSwapWithHighPriorityFee() (gas: 6160965)
+[PASS] test_ComplexScenario_LowHighLow() (gas: 26820418)
+[PASS] test_MedianRecoversAfterPressureEnds() (gas: 27753005)
+[PASS] test_SustainedHighFeePressure_MedianShifts() (gas: 14495829)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 220.67ms (576.99ms CPU time)
+
+Ran 2 test suites in 221.35ms (441.33ms CPU time): 11 tests passed, 0 failed, 0 skipped (11 total tests)
 
 ╭-------------------------------------------+------------------+------------------+----------------+-----------------╮
 | File                                      | % Lines          | % Statements     | % Branches     | % Funcs         |
