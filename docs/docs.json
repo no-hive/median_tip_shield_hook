@@ -28,8 +28,8 @@
             "pages": [
               "code/contract",
               "code/tests",
-              "extra/contribute",
-              "extra/changelog"
+              "code/contribute",
+              "code/changelog"
             ]
           },
           {
