@@ -22,7 +22,7 @@ library FrugalMedianLibrary {
     {
         unchecked {
             if (newNumber > approxMedian) {
-                step += positive ? stepIncrement(step) : -stepIncrement(step);
+                step += positive ? stepIncrement(newNumber) : -stepIncrement(newNumber);
                 // line 6: we cant do ceiling
                 approxMedian += (step > 0) ? step : int256(1);
                 if (approxMedian > newNumber) {
@@ -34,7 +34,7 @@ library FrugalMedianLibrary {
                 }
                 positive = true;
             } else if (newNumber < approxMedian) {
-                step += !positive ? stepIncrement(step) : -stepIncrement(step);
+                step += !positive ? stepIncrement(newNumber) : -stepIncrement(newNumber);
                 approxMedian -= (step > 0) ? step : int256(1);
                 // line 18
                 if (approxMedian < newNumber) {
@@ -50,7 +50,18 @@ library FrugalMedianLibrary {
         return (approxMedian, step, positive);
     }
 
-    function stepIncrement(int256 step) private pure returns (int256) {
-        return 1;
+    // Per-iteration increment added to the (still accumulating) step:
+    // ~1% of |newNumber|. Since `step` in updateApproxMedian is built up
+    // via `step += stepIncrement(...)` across iterations rather than
+    // reassigned, a sustained same-direction run of updates converges
+    // quadratically (~sqrt(2*100) ≈ 14 iterations to fully catch up to a
+    // new level), not linearly at ~100. Floors at 1 so the median can
+    // still move by at least 1 unit even for very small values.
+    uint256 private constant STEP_DIVISOR = 100;
+
+    function stepIncrement(int256 newNumber) private pure returns (int256) {
+        int256 magnitude = newNumber >= 0 ? newNumber : -newNumber;
+        int256 inc = magnitude / int256(STEP_DIVISOR);
+        return inc < 1 ? int256(1) : inc;
     }
 }
