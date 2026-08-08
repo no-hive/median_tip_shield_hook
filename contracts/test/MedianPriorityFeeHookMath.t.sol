@@ -29,27 +29,23 @@ contract MedianPriorityFeeHookMathTest is Test {
     uint256 constant RATIO_THRESHOLD = 2700; // 2.7x, PRECISION = 1000
 
     function setUp() public {
-
-    
         vm.startBroadcast();
-            // Dummy pool manager address is fine here — the harness never
+        // Dummy pool manager address is fine here — the harness never
         // talks to it, we only exercise the pure fee-curve math.
         IPoolManager dummyPoolManager = IPoolManager(address(0xBEEF));
         address[] memory listedTokens = new address[](0);
 
         // Hook address must encode ALL flags the hook declares in
         // getHookPermissions(): afterInitialize, beforeSwap, afterSwap.
-        uint160 flags =
-            uint160(Hooks.AFTER_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG | Hooks.AFTER_SWAP_FLAG);
+        uint160 flags = uint160(Hooks.AFTER_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG | Hooks.AFTER_SWAP_FLAG);
 
         bytes memory constructorArgs = abi.encode(dummyPoolManager, listedTokens);
-        (address hookAddress, bytes32 salt) = HookMiner.find(
-            CREATE2_FACTORY, flags, type(MedianPriorityFeeHookHarness).creationCode, constructorArgs
-        );
+        (address hookAddress, bytes32 salt) =
+            HookMiner.find(CREATE2_FACTORY, flags, type(MedianPriorityFeeHookHarness).creationCode, constructorArgs);
 
         hook = new MedianPriorityFeeHookHarness{salt: salt}(dummyPoolManager, listedTokens);
         require(address(hook) == hookAddress, "harness address mismatch");
-          vm.stopBroadcast();
+        vm.stopBroadcast();
     }
 
     function test_noReferenceYet_returnsBasicFee() public {
@@ -105,11 +101,15 @@ contract MedianPriorityFeeHookMathTest is Test {
         assertEq(feeAt1000x, expectedMaxFee);
     }
 
-    function testFuzz_feeNeverExceedsMax(uint256 priorityFee, int256 referenceMedianRaw) public {
-        int256 referenceMedian = int256(bound(uint256(int256(referenceMedianRaw < 0 ? -referenceMedianRaw : referenceMedianRaw)), 1, 1e30));
+    function testFuzz_feeNeverExceedsMax(uint256 priorityFee, uint256 referenceMedianRaw) public {
+        uint256 boundedReferenceMedian = bound(referenceMedianRaw, 1, 1e30);
+
+        int256 referenceMedian = int256(boundedReferenceMedian);
+
         priorityFee = bound(priorityFee, 0, type(uint128).max);
 
         uint24 expectedMaxFee = BASIC_FEE + uint24(10 * 10_000);
+
         uint24 fee = hook.exposed_getDynamicFee(priorityFee, referenceMedian);
 
         assertLe(fee, expectedMaxFee);
